@@ -26,6 +26,13 @@ html, body {
   padding: 0;
 }
 
+/* HIDE DEFAULT SYSTEM BROWSER CURSOR ON DESKTOP DEVICES */
+@media (min-width: 768px) {
+  html, body, button, a, input, select, textarea, [role="button"], label, div {
+    cursor: none !important;
+  }
+}
+
 /* COMPACT INNER SCREEN CONTENT ON MOBILE PHONES (<640px) ONLY INSIDE THE VIRTUAL SPIDER DISPLAY SCREEN */
 @media (max-width: 639px) {
   .inner-screen-content {

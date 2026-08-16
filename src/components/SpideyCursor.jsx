@@ -62,8 +62,8 @@ export function SpideyCursor() {
       for (let i = 0; i < 8; i++) {
         const angle = (Math.PI * 2 / 8) * i;
         lines.push({
-          x2: x + Math.cos(angle) * 35,
-          y2: y + Math.sin(angle) * 35
+          x2: x + Math.cos(angle) * 40,
+          y2: y + Math.sin(angle) * 40
         });
       }
 
@@ -89,7 +89,7 @@ export function SpideyCursor() {
   if (isMobileScreen) return null;
 
   return (
-    <div className="hidden md:block pointer-events-none fixed inset-0 z-50 overflow-hidden select-none">
+    <div className="hidden md:block pointer-events-none fixed inset-0 z-[9999] overflow-hidden select-none">
       
       {/* 1. TRAIL LINES - DISAPPEARS WHEN STOPPED */}
       <svg className="w-full h-full absolute inset-0">
@@ -102,7 +102,7 @@ export function SpideyCursor() {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeDasharray="4 2"
-            opacity="0.8"
+            opacity="0.85"
           />
         )}
 
@@ -125,30 +125,46 @@ export function SpideyCursor() {
         ))}
       </svg>
 
-      {/* 3. DYNAMIC THEME-CUSTOMIZED SPIDEY CURSOR */}
+      {/* 3. DYNAMIC WEB-SHOOTER GAUNTLET & NOZZLE CURSOR */}
       <div
-        className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-100 ${
-          isHovered ? 'scale-135' : 'scale-100'
+        className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-75 ${
+          isHovered ? 'scale-125' : 'scale-100'
         }`}
         style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
       >
-        {/* Radial Web Target Reticle */}
-        <div
-          className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all ${
-            isHovered
-              ? 'border-yellow-400 bg-red-600/30 scale-125 bio-glow rotate-45'
-              : 'border-red-500 bg-slate-950/80'
-          }`}
-          style={{ borderColor: 'var(--color-primary, #ff003c)' }}
-        >
-          {/* Center Icon */}
-          <span className="text-xs">{currentThemeObj.badge}</span>
-        </div>
+        {/* Authentic Web-Shooter SVG Gauntlet / Nozzle */}
+        <div className="relative w-12 h-12 flex items-center justify-center">
+          <svg className="w-full h-full drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Gauntlet Metallic Base */}
+            <rect x="20" y="32" width="24" height="26" rx="4" fill="#0d0f26" stroke="#000" strokeWidth="3" />
+            
+            {/* Dual Web Fluid Cartridges */}
+            <rect x="12" y="34" width="7" height="20" rx="3" fill="var(--color-primary, #fcee09)" stroke="#000" strokeWidth="2" />
+            <rect x="45" y="34" width="7" height="20" rx="3" fill="var(--color-primary, #fcee09)" stroke="#000" strokeWidth="2" />
+            
+            {/* Emitter Nozzle Trigger Bar */}
+            <rect x="27" y="16" width="10" height="18" rx="2" fill="var(--color-secondary, #00f0ff)" stroke="#000" strokeWidth="2" />
+            
+            {/* Web Emitter Tip Pin */}
+            <circle cx="32" cy="12" r="4" fill="#ffffff" stroke="#000" strokeWidth="2" />
+            
+            {/* Laser Target Crosshair Lines (Glows on Hover) */}
+            <line x1="32" y1="2" x2="32" y2="8" stroke={isHovered ? '#ff003c' : 'var(--color-primary, #fcee09)'} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="32" y1="56" x2="32" y2="62" stroke={isHovered ? '#ff003c' : 'var(--color-primary, #fcee09)'} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="2" y1="32" x2="8" y2="32" stroke={isHovered ? '#ff003c' : 'var(--color-primary, #fcee09)'} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="56" y1="32" x2="62" y2="32" stroke={isHovered ? '#ff003c' : 'var(--color-primary, #fcee09)'} strokeWidth="2.5" strokeLinecap="round" />
 
-        {/* Crosshair Spoke Indicators on Hover */}
-        {isHovered && (
-          <div className="absolute inset-0 border border-dashed border-cyan-400 rounded-full animate-spin" style={{ animationDuration: '4s' }} />
-        )}
+            {/* Target Reticle Lock Box on Hover */}
+            {isHovered && (
+              <rect x="10" y="10" width="44" height="44" rx="6" fill="none" stroke="#ff003c" strokeWidth="2" strokeDasharray="6 4" className="animate-spin" style={{ transformOrigin: '32px 32px', animationDuration: '3s' }} />
+            )}
+          </svg>
+
+          {/* Universe Badge Icon */}
+          <span className="absolute text-[10px] bottom-1 font-bold pointer-events-none drop-shadow">
+            {currentThemeObj.badge}
+          </span>
+        </div>
       </div>
 
     </div>
