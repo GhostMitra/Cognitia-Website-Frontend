@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #0b132b;
+    color: #ffffff;
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Pixel & Retro Fonts from Google Fonts */
+.font-pixel {
+  font-family: 'Press Start 2P', monospace;
+}
+
+.font-silkscreen {
+  font-family: 'Silkscreen', cursive;
+}
+
+.font-mono-retro {
+  font-family: 'VT323', monospace;
+}
+
+/* Scanlines overlay effect for CRT screen */
+.scanline-overlay {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.4) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.04),
+    rgba(0, 255, 0, 0.02),
+    rgba(0, 0, 255, 0.04)
+  );
+  background-size: 100% 3px, 4px 100%;
+}
+
+/* Custom 8-bit Pixel Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #141618;
+  border-left: 2px solid #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3e444a;
+  border: 2px solid #000;
+  box-shadow: inset 1px 1px 0 #606870, inset -1px -1px 0 #202428;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #505860;
+}
+
+/* Pixel Art Image Rendering for sharp scaling */
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* 8-bit Box Glow & Shadow Utilities */
+.pixel-box-shadow {
+  box-shadow: 4px 4px 0 0 rgba(0, 0, 0, 0.85);
+}
+
+.pixel-inset-shadow {
+  box-shadow: inset 3px 3px 0 0 #101114, inset -3px -3px 0 0 #383c44;
+}
+
+/* Upside-Down Hanging Spider-Man Spritesheet Animation (25 frames, 1700px total width, 68x110 each) */
+@keyframes hangingSpideySpriteAnim {
+  from {
+    background-position: 0px 0px;
+  }
+  to {
+    background-position: -1700px 0px;
+  }
+}
+
+.animate-hanging-spidey {
+  animation: hangingSpideySpriteAnim 2.2s steps(25) infinite;
+}
+
+.animate-hanging-spidey-fast {
+  animation: hangingSpideySpriteAnim 1.0s steps(25) infinite;
+}
+
+@keyframes shortSway {
+  0%, 100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+.animate-short-sway {
+  transform-origin: top center;
+  animation: shortSway 2.4s ease-in-out infinite;
+}
+
+/* Spider-Man Head Turn Real Spritesheet Animation */
+@keyframes spideyHeadTurnRealSprite {
+  from {
+    background-position: 0px 0px;
+  }
+  to {
+    background-position: -3726px 0px;
+  }
+}
+
+.animate-spidey-head-turn {
+  animation: spideyHeadTurnRealSprite 1.8s steps(46) infinite;
+}

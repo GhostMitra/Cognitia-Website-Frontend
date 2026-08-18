@@ -1,0 +1,6 @@
+{
+  "name": "Pixel Console HUD",
+  "description": "Retro handheld console design system and HUD frame with swappable cartridge viewports, physical-press buttons, and boot diagnostics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
