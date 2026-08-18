@@ -1,5 +1,5 @@
-import React from 'react';
-import { SpideyMenuButton } from './SpideyMenuButton';
+import React from "react";
+import { SpideyMenuButton } from "./SpideyMenuButton";
 
 interface ScreenViewportProps {
   children: React.ReactNode;
@@ -12,8 +12,8 @@ interface ScreenViewportProps {
 
 export function ScreenViewport({
   children,
-  activeCartridgeId = 'dashboard',
-  cartridgeName = 'PIXEL HUD',
+  activeCartridgeId = "dashboard",
+  cartridgeName = "PIXEL HUD",
   scanlinesEnabled = true,
   isMenuOpen = false,
   onToggleMenu,
@@ -27,11 +27,8 @@ export function ScreenViewport({
     >
       {/* Top-Right Hanging Upside-Down Spidey Spritesheet Menu Button (Prominent & 100% Unclipped) */}
       {onToggleMenu && (
-        <div className="absolute top-1 sm:top-1.5 right-2 sm:right-3 translate-x-[10px] -translate-y-[10px] z-50 pointer-events-auto">
-          <SpideyMenuButton
-            isOpen={isMenuOpen}
-            onClick={onToggleMenu}
-          />
+        <div className="absolute top-1 sm:top-1.5 right-2 sm:right-3 translate-x-[33px] -translate-y-[25px] z-50 pointer-events-auto">
+          <SpideyMenuButton isOpen={isMenuOpen} onClick={onToggleMenu} />
         </div>
       )}
 
@@ -70,5 +67,3 @@ export function ScreenViewport({
     </div>
   );
 }
-
-
