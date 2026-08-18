@@ -22,6 +22,14 @@
   font-family: 'VT323', monospace;
 }
 
+.font-display {
+  font-family: 'Anton', sans-serif;
+}
+
+.font-condensed {
+  font-family: 'Oswald', sans-serif;
+}
+
 /* Scanlines overlay effect for CRT screen */
 .scanline-overlay {
   background: linear-gradient(

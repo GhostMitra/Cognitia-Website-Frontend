@@ -23,12 +23,12 @@ interface CartridgeDeckModalProps {
 const CARTRIDGES: Cartridge[] = [
   {
     id: 'dashboard',
-    title: 'DASHBOARD & LANDING',
+    title: 'COGNITIA 2026',
     code: 'ROM-001',
     romSize: '512 KB',
-    genre: 'Landing Hub & Stats',
-    iconName: 'LayoutDashboard',
-    description: 'Event overview, countdown timer, bounty stats, and live telemetry.',
+    genre: 'Main Arena & Stats',
+    iconName: 'Sparkles',
+    description: 'Event highlights, Rs.40K+ prize pool, 80 participants, and 30-hour sprint details.',
   },
   {
     id: 'rules',

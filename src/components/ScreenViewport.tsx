@@ -27,7 +27,7 @@ export function ScreenViewport({
     >
       {/* Top-Right Hanging Upside-Down Spidey Spritesheet Menu Button (Prominent & 100% Unclipped) */}
       {onToggleMenu && (
-        <div className="absolute top-1 sm:top-1.5 right-2 sm:right-3 z-50 pointer-events-auto">
+        <div className="absolute top-1 sm:top-1.5 right-2 sm:right-3 translate-x-[10px] -translate-y-[10px] z-50 pointer-events-auto">
           <SpideyMenuButton
             isOpen={isMenuOpen}
             onClick={onToggleMenu}
@@ -70,3 +70,5 @@ export function ScreenViewport({
     </div>
   );
 }
+
+

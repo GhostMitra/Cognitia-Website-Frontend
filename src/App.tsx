@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { ConsoleShell } from './components/ConsoleShell';
-import { TopBar } from './components/TopBar';
 import { ScreenViewport } from './components/ScreenViewport';
 import { BottomBar } from './components/BottomBar';
 import { Footer } from './components/Footer';
@@ -96,19 +95,19 @@ export default function App() {
     if (isDeckOpen) return 'SELECTING ROM CARTRIDGE MODULE...';
     switch (currentCartridge) {
       case 'dashboard':
-        return '';
+        return 'COGNITIA 2026 • 30-HOUR SPRINT • ₹22,000 CASH POOL';
       case 'rules':
         return 'RULES & ETHICS PROTOCOL';
       case 'tracks':
-        return '5 BOUNTY TRACKS ACTIVE';
+        return 'CHALLENGE TRACKS [TO BE ANNOUNCED]';
       case 'timeline':
-        return 'UTC SPRINT SCHEDULE';
+        return 'SPRINT SCHEDULE [TO BE ANNOUNCED]';
       case 'sponsors':
-        return 'SPONSOR ALLIANCES';
+        return 'SPONSORS & PARTNERS [TO BE ANNOUNCED]';
       case 'members':
-        return 'HACKER DIRECTORY [1,420]';
+        return 'MEMBERS & JURY ROSTER [TO BE ANNOUNCED]';
       case 'prizes':
-        return '$50,000 BOUNTY POOL';
+        return '₹22,000 TOTAL CASH PRIZE POOL';
       case 'faq':
         return 'KNOWLEDGE BASE FAQ';
     }
@@ -142,14 +141,7 @@ export default function App() {
           }}
           onOpenCartridgeMenu={() => setIsDeckOpen((prev) => !prev)}
         >
-          <div className="flex flex-col gap-1 sm:gap-1.5 grow h-full min-h-0" id="pixel-console-app-root">
-            {/* Top Bar HUD */}
-            <TopBar
-              currentCartridge={currentCartridge}
-              onSelectCartridge={handleSelectCartridge}
-              onResetBoot={handleResetBoot}
-            />
-
+          <div className="flex flex-col gap-1 grow h-full min-h-0" id="pixel-console-app-root">
             {/* Full-width Swappable Screen Viewport with Perched Corner Menu Button */}
             <div className="flex-1 min-w-0 min-h-0 flex flex-col h-full">
               <ScreenViewport

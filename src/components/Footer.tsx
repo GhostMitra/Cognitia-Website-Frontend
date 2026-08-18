@@ -1,34 +1,156 @@
+import {
+  MapPin,
+  Calendar,
+  Clock,
+  Mail,
+  Phone,
+  ExternalLink,
+  Instagram,
+  Linkedin,
+} from 'lucide-react';
+import { sound } from '../utils/audio';
+
 export function Footer() {
+  const eventLeads = [
+    { name: 'Trishit Ghosh', phone: '7596026656' },
+    { name: 'Saptadip Mukherjee', phone: '8100655418' },
+    { name: 'Medimi Nishit', phone: '8910922993' },
+  ];
+
   return (
-    <footer className="mt-6 sm:mt-8 flex flex-col items-center gap-3 px-4 text-center select-none" id="real-world-footer">
-      {/* Logos and Brands */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
-        <div className="flex flex-col items-center">
-          <span className="font-silkscreen text-[9px] text-[#e53935] tracking-widest uppercase">
-            MARVEL STUDIOS
-          </span>
-          <h2 className="font-display text-2xl sm:text-3xl font-black italic tracking-wide text-[#e53935] drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)] -mt-1">
-            SPIDER-MAN
-          </h2>
-          <span className="font-condensed text-[10px] font-bold tracking-[0.3em] uppercase text-[#6ec0ff] -mt-1">
-            BRAND NEW DAY &bull; HACKATHON 2026
-          </span>
+    <footer
+      className="w-full max-w-6xl mx-auto mt-6 sm:mt-10 flex flex-col items-center gap-8 px-4 text-center select-none"
+      id="real-world-footer"
+    >
+      
+
+      {/* 2. Venue, Event Leads, and Connect Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 w-full pt-6 border-t border-[#1b2650] text-left">
+        {/* Column 1: Venue */}
+        <div className="space-y-3.5">
+          <h3 className="font-condensed text-lg sm:text-xl font-bold tracking-wide text-white uppercase">
+            Venue
+          </h3>
+
+          <ul className="space-y-2.5 font-condensed text-[13px] sm:text-[14px] text-[#c0c6e4] tracking-wide">
+            <li className="flex items-start gap-2.5">
+              <MapPin className="h-4 w-4 text-[#e53935] shrink-0 mt-0.5" />
+              <span>IEM Gurukul Building, Kolkata</span>
+            </li>
+            <li className="flex items-center gap-2.5">
+              <Calendar className="h-4 w-4 text-[#6ec0ff] shrink-0" />
+              <span>18th-19th September 2025</span>
+            </li>
+            <li className="flex items-center gap-2.5">
+              <Clock className="h-4 w-4 text-[#a7d38a] shrink-0" />
+              <span>30 Hour Hackathon</span>
+            </li>
+            <li className="flex items-center gap-2.5">
+              <Mail className="h-4 w-4 text-[#f4c151] shrink-0" />
+              <a
+                href="cognitia2026.official@gmail.com"
+                onClick={() => sound.playBlip(700)}
+                className="hover:text-white transition-colors underline decoration-dotted"
+              >
+                cognitia2026.official@gmail.com
+              </a>
+            </li>
+          </ul>
+
+          {/* Interactive Map Embed Card */}
+          <div className="relative rounded-lg overflow-hidden border border-[#2a3765] bg-[#0d152e] shadow-md group max-w-[320px] mt-2">
+            <div className="w-full h-32 relative">
+              <iframe
+                title="IEM Gurukul Building Kolkata Location Map"
+                src="https://maps.google.com/maps?q=IEM+Gurukul+Campus+Y-12+Sector+V+Salt+Lake+Kolkata&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                className="w-full h-full border-0 filter brightness-95 contrast-105"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0d152e] via-transparent to-transparent pointer-events-none" />
+            </div>
+
+            <div className="p-2 bg-[#0d152e] border-t border-[#1b2650] flex items-center justify-between">
+              <span className="font-condensed text-[11px] tracking-wider text-[#6ec0ff] uppercase font-bold">
+                SECTOR V, KOLKATA
+              </span>
+              <a
+                href="https://maps.google.com/?q=IEM+Gurukul+Building+Kolkata"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => sound.playBlip(800)}
+                className="inline-flex items-center gap-1 font-condensed text-[11px] text-white bg-[#1b274e] hover:bg-[#25366d] px-2 py-0.5 rounded border border-[#3b4b80] transition-colors"
+              >
+                <span>Open in Maps</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </div>
         </div>
 
-        <div className="hidden sm:block h-8 w-[1px] bg-[#2a3765]" />
+        {/* Column 2: Event Leads */}
+        <div className="space-y-3.5">
+          <h3 className="font-condensed text-lg sm:text-xl font-bold tracking-wide text-white uppercase">
+            Event Leads
+          </h3>
 
-        <div className="flex flex-col items-center sm:items-start">
-          <span className="font-condensed text-[10px] text-[#9aa0c8] uppercase tracking-wider">
-            Powered by
-          </span>
-          <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-white">
-            SAMSUNG Galaxy
-          </span>
+          <div className="space-y-2.5 pt-1">
+            {eventLeads.map((lead, idx) => (
+              <a
+                key={idx}
+                href={`tel:${lead.phone}`}
+                onClick={() => sound.playBlip(750)}
+                className="flex items-center justify-between p-2 sm:p-2.5 rounded-full bg-[#1b121c] hover:bg-[#251828] border border-[#521c2c] hover:border-[#e53935] transition-all group max-w-[340px]"
+              >
+                <div className="flex items-center gap-2 pl-2">
+                  <Phone className="h-3.5 w-3.5 text-[#e53935]" />
+                  <span className="font-condensed text-[13px] sm:text-[14px] text-white font-medium tracking-wide">
+                    {lead.name}
+                  </span>
+                </div>
+                <span className="font-condensed text-[12px] bg-[#38141f] text-[#ffb4c0] border border-[#6b2539] px-2.5 py-0.5 rounded-full font-bold tracking-wider group-hover:border-[#e53935] transition-colors">
+                  {lead.phone}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Column 3: Connect */}
+        <div className="space-y-3.5">
+          <h3 className="font-condensed text-lg sm:text-xl font-bold tracking-wide text-white uppercase">
+            Connect
+          </h3>
+
+          <div className="flex items-center gap-3 pt-1">
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => sound.playBlip(650)}
+              className="p-2 rounded-lg bg-[#141d38] border border-[#2a3765] hover:border-[#6ec0ff] hover:text-[#6ec0ff] text-[#9aa0c8] transition-all hover:scale-105"
+              title="Instagram"
+              aria-label="Instagram"
+            >
+              <Instagram className="h-5 w-5" />
+            </a>
+            <a
+              href="https://linkedin.com"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => sound.playBlip(700)}
+              className="p-2 rounded-lg bg-[#141d38] border border-[#2a3765] hover:border-[#6ec0ff] hover:text-[#6ec0ff] text-[#9aa0c8] transition-all hover:scale-105"
+              title="LinkedIn"
+              aria-label="LinkedIn"
+            >
+              <Linkedin className="h-5 w-5" />
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* Legal and Quick Links */}
-      <nav className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 text-[10px] uppercase tracking-wider font-condensed text-[#9aa0c8] pt-2 border-t border-[#1b2650] w-full max-w-2xl">
+      {/* 3. Legal and Quick Links */}
+      <nav className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-[11px] uppercase tracking-wider font-condensed text-[#9aa0c8] pt-4 border-t border-[#1b2650] w-full max-w-3xl">
         <a href="#privacy" className="hover:text-white transition-colors">PRIVACY POLICY</a>
         <span className="text-[#3b4778]">•</span>
         <a href="#terms" className="hover:text-white transition-colors">TERMS OF USE</a>
@@ -38,9 +160,8 @@ export function Footer() {
         <a href="#credits" className="hover:text-white transition-colors">CREDITS ▲</a>
       </nav>
 
-      <p className="font-condensed text-[9px] tracking-wider text-[#6d759d]">
-        &copy; &amp; &trade; 2026 MARVEL. &copy;2026 CPII AND PIXEL HUD SYSTEMS LLC. ALL RIGHTS RESERVED.
-      </p>
+     
+     
     </footer>
   );
 }

@@ -1,241 +1,141 @@
-import { useState, useEffect } from 'react';
-import { CTAButton } from '../CTAButton';
+import { Award, Users, Zap, Sparkles, Terminal } from 'lucide-react';
 import { CartridgeId } from '../../types';
-import {
-  Flame,
-  Award,
-  Users,
-  Code,
-  CheckCircle2,
-  Calendar,
-  Layers,
-  HelpCircle,
-} from 'lucide-react';
-import { sound } from '../../utils/audio';
 
 interface DashboardCartridgeProps {
-  onNavigate: (id: CartridgeId) => void;
+  onNavigate?: (id: CartridgeId) => void;
 }
 
 export function DashboardCartridge({ onNavigate }: DashboardCartridgeProps) {
-  const [countdown, setCountdown] = useState({ days: 12, hours: 8, mins: 44, secs: 20 });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev.secs > 0) return { ...prev, secs: prev.secs - 1 };
-        if (prev.mins > 0) return { ...prev, mins: 59, secs: 59 };
-        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, mins: 59, secs: 59 };
-        if (prev.days > 0) return { ...prev, days: prev.days - 1, hours: 23, mins: 59, secs: 59 };
-        return prev;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   return (
-    <div className="flex flex-col h-full justify-between gap-3 sm:gap-4 select-none" id="cartridge-dashboard">
-      {/* Top Banner Hero */}
-      <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between pb-3 border-b-2 border-[#2b2e30] gap-2">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-pixel text-[12px] sm:text-[15px] text-[#f4c151] drop-shadow-[1px_1px_0_rgba(0,0,0,0.8)]">
-              PIXEL HACKATHON 2026
-            </span>
-            <span className="bg-[#1e2f18] text-[#a7d38a] border border-[#2f4f24] font-silkscreen text-[9px] px-2 py-0.5 rounded-xs">
-              LIVE EVENT &bull; 48H SPRINT
-            </span>
-          </div>
-          <p className="font-silkscreen text-[9px] sm:text-[10px] text-[#9aa0c8] max-w-2xl leading-relaxed">
-            Welcome to the ultimate retro-futuristic hackathon. Build 8-bit games, AI systems, Web3 dApps, and retro hardware tools.
-          </p>
-        </div>
-      </div>
-
-      {/* Countdown Timer Block & Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3">
-        {/* Countdown Box */}
-        <div className="p-3 rounded-lg bg-[#141618] border-2 border-[#2b2e30] flex flex-col justify-between shadow-inner">
-          <div className="flex items-center justify-between">
-            <span className="font-silkscreen text-[8px] text-[#8f9396] uppercase tracking-wider flex items-center gap-1">
-              <Calendar className="h-3 w-3 text-[#f4c151]" /> SUBMISSION COUNTDOWN
-            </span>
-            <span className="inline-block h-2 w-2 rounded-full bg-[#ef4444] animate-ping" />
-          </div>
-          <div className="grid grid-cols-4 gap-2 py-2.5 text-center">
-            <div className="bg-[#1e2225] border-2 border-black p-2 rounded shadow-[inset_1px_1px_0_0_#101114]">
-              <span className="font-pixel text-[14px] sm:text-[18px] text-[#7ec7ff] block leading-tight drop-shadow-[0_0_4px_rgba(126,199,255,0.4)]">{countdown.days}</span>
-              <span className="font-silkscreen text-[8px] sm:text-[9px] text-[#9ad4ff] font-bold">DAYS</span>
-            </div>
-            <div className="bg-[#1e2225] border-2 border-black p-2 rounded shadow-[inset_1px_1px_0_0_#101114]">
-              <span className="font-pixel text-[14px] sm:text-[18px] text-[#7ec7ff] block leading-tight drop-shadow-[0_0_4px_rgba(126,199,255,0.4)]">{countdown.hours}</span>
-              <span className="font-silkscreen text-[8px] sm:text-[9px] text-[#9ad4ff] font-bold">HRS</span>
-            </div>
-            <div className="bg-[#1e2225] border-2 border-black p-2 rounded shadow-[inset_1px_1px_0_0_#101114]">
-              <span className="font-pixel text-[14px] sm:text-[18px] text-[#7ec7ff] block leading-tight drop-shadow-[0_0_4px_rgba(126,199,255,0.4)]">{countdown.mins}</span>
-              <span className="font-silkscreen text-[8px] sm:text-[9px] text-[#9ad4ff] font-bold">MINS</span>
-            </div>
-            <div className="bg-[#1e2225] border-2 border-black p-2 rounded shadow-[inset_1px_1px_0_0_#101114]">
-              <span className="font-pixel text-[14px] sm:text-[18px] text-[#7ec7ff] block leading-tight drop-shadow-[0_0_4px_rgba(126,199,255,0.4)]">{countdown.secs}</span>
-              <span className="font-silkscreen text-[8px] sm:text-[9px] text-[#9ad4ff] font-bold">SECS</span>
-            </div>
-          </div>
-          <span className="font-silkscreen text-[8px] text-[#7d8285] text-center">DEADLINE: SUNDAY 18:00 UTC</span>
+    <div
+      className="flex flex-col h-full justify-between items-center text-center gap-2 sm:gap-3 md:gap-4 select-none px-2 sm:px-4 py-2 sm:py-3"
+      id="cartridge-main-view"
+    >
+      {/* Top Section: Prominent Big COGNITIA Logo & Badges with Ample Spacing */}
+      <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3 pt-1 w-full shrink-0">
+        {/* Big Featured Logo with Soft Light Blue Shadow/Glow */}
+        <div className="relative group flex items-center justify-center w-full max-w-[500px] sm:max-w-[620px] md:max-w-[760px] transition-all duration-300">
+          <img
+            src="/cognitia_logo.png"
+            alt="COGNITIA"
+            className="w-full h-auto max-h-[85px] sm:max-h-[105px] md:max-h-[120px] object-contain drop-shadow-[0_4px_20px_rgba(126,199,255,0.32)] filter brightness-105 contrast-105 transition-all duration-300 group-hover:brightness-115 group-hover:drop-shadow-[0_6px_30px_rgba(126,199,255,0.55)]"
+            referrerPolicy="no-referrer"
+          />
         </div>
 
-        {/* Prize Pool & Tracks Stat */}
-        <div className="p-3 rounded-lg bg-[#141618] border-2 border-[#2b2e30] flex flex-col justify-between shadow-inner">
-          <div className="flex items-center justify-between">
-            <span className="font-silkscreen text-[8px] text-[#8f9396] uppercase tracking-wider flex items-center gap-1">
-              <Award className="h-3 w-3 text-[#a7d38a]" /> TOTAL PRIZE POOL
-            </span>
-            <span className="font-silkscreen text-[8px] text-[#a7d38a]">5 TRACKS</span>
-          </div>
-          <div className="py-1">
-            <span className="font-pixel text-[16px] sm:text-[22px] text-[#a7d38a] block tracking-wide">
-              $50,000+
-            </span>
-            <span className="font-silkscreen text-[8px] text-[#7d8285]">
-              Plus cloud credits, retro consoles &amp; developer grants
-            </span>
-          </div>
-          <div className="flex gap-1 pt-1">
-            <button
-              onClick={() => onNavigate('prizes')}
-              className="font-pixel text-[8px] text-[#cfe8ff] hover:text-[#f4c151] underline cursor-pointer"
-            >
-              [VIEW PRIZES &gt;]
-            </button>
-          </div>
-        </div>
-
-        {/* Hackers Registered & Community */}
-        <div className="p-3 rounded-lg bg-[#141618] border-2 border-[#2b2e30] flex flex-col justify-between shadow-inner">
-          <div className="flex items-center justify-between">
-            <span className="font-silkscreen text-[8px] text-[#8f9396] uppercase tracking-wider flex items-center gap-1">
-              <Users className="h-3 w-3 text-[#6fb3d9]" /> HACKER MATRIX
-            </span>
-            <span className="font-silkscreen text-[8px] text-[#6ee7b7]">ONLINE: 480</span>
-          </div>
-          <div className="py-1">
-            <span className="font-pixel text-[16px] sm:text-[22px] text-[#cfe8ff] block">
-              1,420 <span className="text-[10px] text-[#8ea7c2]">BUILDERS</span>
-            </span>
-            <span className="font-silkscreen text-[8px] text-[#7d8285]">
-              312 Teams Formed &bull; 42 Countries Represented
-            </span>
-          </div>
-          <div className="flex gap-1 pt-1">
-            <button
-              onClick={() => onNavigate('members')}
-              className="font-pixel text-[8px] text-[#cfe8ff] hover:text-[#f4c151] underline cursor-pointer"
-            >
-              [TEAM DIRECTORY &gt;]
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Access Cartridge Launcher Grid */}
-      <div className="p-3.5 rounded-lg bg-[#181a1b] border-2 border-[#2b2e30] space-y-2.5">
-        <div className="flex items-center justify-between">
-          <span className="font-silkscreen text-[9px] text-[#8f9396] uppercase tracking-wider flex items-center gap-1">
-            <Flame className="h-3.5 w-3.5 text-[#f2933d]" /> EXPLORE CARTRIDGES:
+        {/* Event Meta Badges with Breathing Room */}
+        <div className="flex items-center justify-center gap-2.5 sm:gap-3 flex-wrap pt-0.5">
+          <span className="inline-flex items-center gap-1.5 bg-[#142338] text-[#7ec7ff] border border-[#1f4066] font-silkscreen text-[8.5px] sm:text-[9.5px] px-3 py-1 rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#7ec7ff] animate-pulse shadow-[0_0_6px_#7ec7ff]" />
+            HACKATHON 2026
           </span>
-          <span className="font-silkscreen text-[8px] text-[#a7d38a]">HOT-SWAP INSTANT</span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <CTAButton
-            id="btn-dash-tracks"
-            variant="gold"
-            soundType="coin"
-            onClick={() => onNavigate('tracks')}
-            icon={<Code className="h-3 w-3" />}
-            className="text-[8px] sm:text-[9px] py-2.5 w-full"
-          >
-            TRACKS
-          </CTAButton>
-          <CTAButton
-            id="btn-dash-rules"
-            variant="silver"
-            soundType="blip"
-            onClick={() => onNavigate('rules')}
-            icon={<CheckCircle2 className="h-3 w-3" />}
-            className="text-[8px] sm:text-[9px] py-2.5 w-full"
-          >
-            RULES
-          </CTAButton>
-          <CTAButton
-            id="btn-dash-timeline"
-            variant="silver"
-            soundType="blip"
-            onClick={() => onNavigate('timeline')}
-            icon={<Calendar className="h-3 w-3" />}
-            className="text-[8px] sm:text-[9px] py-2.5 w-full"
-          >
-            SCHEDULE
-          </CTAButton>
-          <CTAButton
-            id="btn-dash-prizes"
-            variant="ruby"
-            soundType="coin"
-            onClick={() => onNavigate('prizes')}
-            icon={<Award className="h-3 w-3" />}
-            className="text-[8px] sm:text-[9px] py-2.5 w-full"
-          >
-            PRIZES
-          </CTAButton>
+          <span className="inline-flex items-center gap-1.5 bg-[#1e2f18] text-[#a7d38a] border border-[#2f4f24] font-silkscreen text-[8.5px] sm:text-[9.5px] px-3 py-1 rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+            <Sparkles className="h-2.5 w-2.5 text-[#f4c151]" />
+            OFFICIAL STAGE
+          </span>
         </div>
       </div>
 
-      {/* Bottom Navigation Ribbon */}
-      <div className="pt-2 border-t border-[#26282a] flex flex-wrap items-center justify-between gap-2">
+      {/* Center 3 Key Stat Highlights: Prize Pool, Total Participants, 30 Hour Hackathon */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-5 w-full max-w-5xl my-auto py-1">
+        {/* 1. PRIZE POOL */}
+        <div
+          className="p-3 sm:p-4 rounded-lg bg-[#141618] border-[2.5px] border-black flex flex-col justify-between items-center text-center
+                     shadow-[inset_2px_2px_0_0_#2b2e30,inset_-2px_-2px_0_0_#0a0b0c,3px_3px_0_0_rgba(0,0,0,0.6)]
+                     transition-transform hover:-translate-y-0.5"
+        >
+          <div className="flex items-center gap-1.5 text-[#f4c151] pb-1">
+            <Award className="h-4 w-4 text-[#f4c151]" />
+            <span className="font-silkscreen text-[9px] sm:text-[10px] uppercase tracking-wider text-[#d4af37]">
+              PRIZE POOL
+            </span>
+          </div>
+
+          <div className="py-1.5 sm:py-2">
+            <span className="font-pixel text-[22px] sm:text-[26px] md:text-[28px] text-[#a7d38a] block tracking-wide drop-shadow-[0_0_8px_rgba(167,211,138,0.35)] leading-none">
+              ₹22,000
+            </span>
+            <span className="font-silkscreen text-[8px] sm:text-[9px] text-[#8fa892] mt-1.5 block">
+              ₹22,000 in Total Cash Prizes
+            </span>
+          </div>
+
+          <div className="w-full pt-1.5 border-t border-[#23272a]">
+            <span className="font-silkscreen text-[7.5px] sm:text-[8px] text-[#7d8285]">
+              ₹10K / ₹6K / ₹4K + ₹2K Bounties
+            </span>
+          </div>
+        </div>
+
+        {/* 2. TOTAL PARTICIPANTS */}
+        <div
+          className="p-3 sm:p-4 rounded-lg bg-[#141618] border-[2.5px] border-black flex flex-col justify-between items-center text-center
+                     shadow-[inset_2px_2px_0_0_#2b2e30,inset_-2px_-2px_0_0_#0a0b0c,3px_3px_0_0_rgba(0,0,0,0.6)]
+                     transition-transform hover:-translate-y-0.5"
+        >
+          <div className="flex items-center gap-1.5 text-[#7ec7ff] pb-1">
+            <Users className="h-4 w-4 text-[#7ec7ff]" />
+            <span className="font-silkscreen text-[9px] sm:text-[10px] uppercase tracking-wider text-[#6fb3d9]">
+              PARTICIPANTS
+            </span>
+          </div>
+
+          <div className="py-1.5 sm:py-2">
+            <span className="font-pixel text-[22px] sm:text-[26px] md:text-[28px] text-[#7ec7ff] block tracking-wide drop-shadow-[0_0_8px_rgba(126,199,255,0.35)] leading-none">
+              80
+            </span>
+            <span className="font-silkscreen text-[8px] sm:text-[9px] text-[#9ad4ff] mt-1.5 block">
+              Selected Hackers &amp; Builders
+            </span>
+          </div>
+
+          <div className="w-full pt-1.5 border-t border-[#23272a]">
+            <span className="font-silkscreen text-[7.5px] sm:text-[8px] text-[#7d8285]">
+              Curated Elite Cohort
+            </span>
+          </div>
+        </div>
+
+        {/* 3. 30 HOUR HACKATHON */}
+        <div
+          className="p-3 sm:p-4 rounded-lg bg-[#141618] border-[2.5px] border-black flex flex-col justify-between items-center text-center
+                     shadow-[inset_2px_2px_0_0_#2b2e30,inset_-2px_-2px_0_0_#0a0b0c,3px_3px_0_0_rgba(0,0,0,0.6)]
+                     transition-transform hover:-translate-y-0.5"
+        >
+          <div className="flex items-center gap-1.5 text-[#f2933d] pb-1">
+            <Zap className="h-4 w-4 text-[#f2933d]" />
+            <span className="font-silkscreen text-[9px] sm:text-[10px] uppercase tracking-wider text-[#e68a35]">
+              SPRINT DURATION
+            </span>
+          </div>
+
+          <div className="py-1.5 sm:py-2">
+            <span className="font-pixel text-[22px] sm:text-[26px] md:text-[28px] text-[#f4c151] block tracking-wide drop-shadow-[0_0_8px_rgba(244,193,81,0.35)] leading-none">
+              30 HOURS
+            </span>
+            <span className="font-silkscreen text-[8px] sm:text-[9px] text-[#ffd17d] mt-1.5 block">
+              Non-Stop Hackathon Sprint
+            </span>
+          </div>
+
+          <div className="w-full pt-1.5 border-t border-[#23272a]">
+            <span className="font-silkscreen text-[7.5px] sm:text-[8px] text-[#7d8285]">
+              Ideate &bull; Build &bull; Ship
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Terminal Status Bar */}
+      <div className="w-full max-w-5xl py-2 px-3 rounded bg-[#101214] border border-[#232629] flex flex-wrap items-center justify-between gap-2 shrink-0">
         <div className="flex items-center gap-2">
-          <span className="font-silkscreen text-[9px] text-[#8f9396]">QUICK LINKS:</span>
-          <button
-            id="btn-dash-sponsors"
-            type="button"
-            onClick={() => {
-              sound.playCoin();
-              onNavigate('sponsors');
-            }}
-            className="px-3 py-1.5 rounded bg-[#1e2f18] hover:bg-[#284221] border border-[#2f4f24]
-                       font-pixel text-[8px] text-[#a7d38a] tracking-wider cursor-pointer active:translate-y-[1px]"
-          >
-            [SPONSORS]
-          </button>
-          <button
-            id="btn-dash-faq"
-            type="button"
-            onClick={() => {
-              sound.playBlip(750);
-              onNavigate('faq');
-            }}
-            className="px-3 py-1.5 rounded bg-[#203a54] hover:bg-[#284a6b] border border-[#3b6e93]
-                       font-pixel text-[8px] text-[#f4c151] tracking-wider cursor-pointer active:translate-y-[1px]"
-          >
-            [FAQ]
-          </button>
-          <button
-            id="btn-dash-members"
-            type="button"
-            onClick={() => {
-              sound.playBlip(800);
-              onNavigate('members');
-            }}
-            className="px-3 py-1.5 rounded bg-[#2a243d] hover:bg-[#382f54] border border-[#48396e]
-                       font-pixel text-[8px] text-[#c4b5fd] tracking-wider cursor-pointer active:translate-y-[1px]"
-          >
-            [MEMBERS]
-          </button>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <Layers className="h-3 w-3 text-[#f4c151]" />
-          <span className="font-silkscreen text-[8px] text-[#7d8285]">
-            8 ACTIVE SYSTEM CARTRIDGES
+          <Terminal className="h-3 w-3 text-[#a7d38a]" />
+          <span className="font-silkscreen text-[8px] sm:text-[8.5px] text-[#8e9396]">
+            STATUS: <span className="text-[#a7d38a]">SYSTEM ARMED &amp; READY</span>
           </span>
+        </div>
+        <div className="font-silkscreen text-[7.5px] sm:text-[8px] text-[#606467]">
+          USE MENU ON TOP RIGHT TO SWITCH CARTRIDGES
         </div>
       </div>
     </div>
