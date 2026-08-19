@@ -12,6 +12,8 @@ import { SponsorsCartridge } from './components/cartridges/SponsorsCartridge';
 import { MembersCartridge } from './components/cartridges/MembersCartridge';
 import { PrizesCartridge } from './components/cartridges/PrizesCartridge';
 import { FAQCartridge } from './components/cartridges/FAQCartridge';
+import { RegistrationCartridge } from './components/cartridges/RegistrationCartridge';
+import { AdminCartridge } from './components/cartridges/AdminCartridge';
 import { CartridgeId } from './types';
 import { sound } from './utils/audio';
 
@@ -20,6 +22,16 @@ export default function App() {
   const [isDeckOpen, setIsDeckOpen] = useState<boolean>(false);
   const [showScanlines] = useState<boolean>(true);
   const [countdown, setCountdown] = useState({ days: 12, hours: 8, mins: 44, secs: 20 });
+
+  // Initial path routing check (e.g., /admin, /register)
+  useEffect(() => {
+    const path = window.location.pathname.toLowerCase();
+    if (path.includes('admin')) {
+      setCurrentCartridge('admin');
+    } else if (path.includes('register') || path.includes('submit')) {
+      setCurrentCartridge('register');
+    }
+  }, []);
 
   // Live countdown timer ticker
   useEffect(() => {
@@ -51,7 +63,7 @@ export default function App() {
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       // Don't trigger if user is in an input
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName)) return;
 
       if (e.key === 'm' || e.key === 'M') {
         sound.toggleMute();
@@ -64,24 +76,27 @@ export default function App() {
         handleSelectCartridge('dashboard');
         setIsDeckOpen(false);
       } else if (e.key === '2') {
-        handleSelectCartridge('rules');
+        handleSelectCartridge('register');
         setIsDeckOpen(false);
       } else if (e.key === '3') {
-        handleSelectCartridge('tracks');
+        handleSelectCartridge('rules');
         setIsDeckOpen(false);
       } else if (e.key === '4') {
-        handleSelectCartridge('timeline');
+        handleSelectCartridge('tracks');
         setIsDeckOpen(false);
       } else if (e.key === '5') {
-        handleSelectCartridge('sponsors');
+        handleSelectCartridge('timeline');
         setIsDeckOpen(false);
       } else if (e.key === '6') {
-        handleSelectCartridge('members');
+        handleSelectCartridge('sponsors');
         setIsDeckOpen(false);
       } else if (e.key === '7') {
-        handleSelectCartridge('prizes');
+        handleSelectCartridge('members');
         setIsDeckOpen(false);
       } else if (e.key === '8') {
+        handleSelectCartridge('prizes');
+        setIsDeckOpen(false);
+      } else if (e.key === '9') {
         handleSelectCartridge('faq');
         setIsDeckOpen(false);
       }
@@ -96,6 +111,8 @@ export default function App() {
     switch (currentCartridge) {
       case 'dashboard':
         return 'COGNITIA 2026 • 30-HOUR SPRINT • ₹22,000 CASH POOL';
+      case 'register':
+        return 'PARTICIPANT LEAD REGISTRATION & SUBMISSION PORTAL';
       case 'rules':
         return 'RULES & ETHICS PROTOCOL';
       case 'tracks':
@@ -110,12 +127,15 @@ export default function App() {
         return '₹22,000 TOTAL CASH PRIZE POOL';
       case 'faq':
         return 'KNOWLEDGE BASE FAQ';
+      case 'admin':
+        return 'RESTRICTED ADMIN CONSOLE [Cognitia2026Admin]';
     }
   };
 
   const getCartridgeName = () => {
     switch (currentCartridge) {
       case 'dashboard': return 'DASHBOARD';
+      case 'register': return 'REGISTER & SUBMIT';
       case 'rules': return 'RULES & REGS';
       case 'tracks': return 'TRACKS';
       case 'timeline': return 'SCHEDULE';
@@ -123,6 +143,7 @@ export default function App() {
       case 'members': return 'MEMBERS';
       case 'prizes': return 'PRIZES';
       case 'faq': return 'FAQ';
+      case 'admin': return 'ADMIN PORTAL';
     }
   };
 
@@ -171,6 +192,7 @@ export default function App() {
                         }}
                       />
                     )}
+                    {currentCartridge === 'register' && <RegistrationCartridge />}
                     {currentCartridge === 'rules' && <RulesCartridge />}
                     {currentCartridge === 'tracks' && <TracksCartridge />}
                     {currentCartridge === 'timeline' && <TimelineCartridge />}
@@ -178,6 +200,7 @@ export default function App() {
                     {currentCartridge === 'members' && <MembersCartridge />}
                     {currentCartridge === 'prizes' && <PrizesCartridge />}
                     {currentCartridge === 'faq' && <FAQCartridge />}
+                    {currentCartridge === 'admin' && <AdminCartridge />}
                   </>
                 )}
               </ScreenViewport>
@@ -203,3 +226,4 @@ export default function App() {
     </div>
   );
 }
+

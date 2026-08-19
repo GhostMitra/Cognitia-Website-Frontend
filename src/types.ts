@@ -6,7 +6,9 @@ export type CartridgeId =
   | 'sponsors'
   | 'members'
   | 'prizes'
-  | 'faq';
+  | 'faq'
+  | 'register'
+  | 'admin';
 
 export type BadgeTone = 'orange' | 'white' | 'red';
 
@@ -74,4 +76,50 @@ export interface FAQItem {
   question: string;
   answer: string;
   category: string;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  githubId: string;
+  isLead?: boolean;
+}
+
+export interface ProjectSubmission {
+  id: string;
+  teamId: string;
+  projectTitle: string;
+  tagline: string;
+  trackId: string;
+  githubRepoUrl: string;
+  pptUrl: string;
+  pptFileName: string;
+  screenshots: string[]; // URLs or Base64 S3 storage
+  submittedAt: string;
+  updatedAt: string;
+}
+
+export type Phase2SelectionStatus = 'pending' | 'selected' | 'not_selected';
+export type Phase2PaymentStatus = 'unpaid' | 'payment_pending' | 'payment_verified';
+
+export interface TeamRegistration {
+  id: string;
+  teamName: string;
+  leadEmail: string;
+  leadPhone: string;
+  leadPasswordHash?: string;
+  members: TeamMember[];
+  registeredAt: string;
+  submission?: ProjectSubmission;
+  // Phase 2 Offline Round Fields
+  phase2Status?: Phase2SelectionStatus;
+  rsvpConfirmed?: boolean;
+  paymentStatus?: Phase2PaymentStatus;
+  paymentScreenshotUrl?: string;
+  paymentSubmittedAt?: string;
+  ticketPassId?: string;
+  ticketIssuedAt?: string;
 }
