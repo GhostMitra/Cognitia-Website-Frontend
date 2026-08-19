@@ -18,9 +18,13 @@ import {
   Ticket,
   Check,
   Sparkles,
+  QrCode,
+  UserCheck,
+  Hourglass,
+  RefreshCw,
 } from 'lucide-react';
 import { awsService } from '../../services/awsService';
-import { TeamRegistration, Phase2SelectionStatus } from '../../types';
+import { TeamRegistration, Phase2SelectionStatus, AttendanceStatus } from '../../types';
 import { sound } from '../../utils/audio';
 
 export const AdminCartridge: React.FC = () => {
@@ -33,6 +37,10 @@ export const AdminCartridge: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedTrack, setSelectedTrack] = useState<string>('all');
   const [selectedTeamModal, setSelectedTeamModal] = useState<TeamRegistration | null>(null);
+
+  // Attendance Scanner Bar State
+  const [scanQuery, setScanQuery] = useState<string>('');
+  const [scanMessage, setScanMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     const authSession = sessionStorage.getItem('cognitia_admin_auth');
@@ -68,9 +76,8 @@ export const AdminCartridge: React.FC = () => {
     sessionStorage.removeItem('cognitia_admin_auth');
   };
 
-  const handleTogglePhase2Selection = async (teamId: string, currentStatus?: Phase2SelectionStatus) => {
+  const handlePhase2StatusChange = async (teamId: string, newStatus: Phase2SelectionStatus) => {
     sound.playBlip(600);
-    const newStatus: Phase2SelectionStatus = currentStatus === 'selected' ? 'not_selected' : 'selected';
     await awsService.updatePhase2Selection(teamId, newStatus);
     loadAdminData();
     if (selectedTeamModal && selectedTeamModal.id === teamId) {
@@ -88,10 +95,48 @@ export const AdminCartridge: React.FC = () => {
     }
   };
 
+  // QR / Ticket Pass ID Attendance Scan
+  const handleAttendanceScanSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setScanMessage(null);
+
+    if (!scanQuery.trim()) {
+      setScanMessage({ type: 'error', text: 'Please scan or enter a Pass Ticket ID or Team ID.' });
+      return;
+    }
+
+    const res = await awsService.markAttendance(scanQuery, 'checked_in');
+    if (res.success && res.team) {
+      sound.playBoot();
+      loadAdminData();
+      setScanMessage({
+        type: 'success',
+        text: `✓ ATTENDANCE MARKED PRESENT: Team '${res.team.teamName}' (${res.team.ticketPassId || res.team.id})`,
+      });
+      setScanQuery('');
+    } else {
+      sound.playBlip(300);
+      setScanMessage({ type: 'error', text: res.message || 'Verification failed.' });
+    }
+  };
+
+  const handleToggleAttendanceStatus = async (teamId: string, currentStatus?: AttendanceStatus) => {
+    sound.playBlip(500);
+    const nextStatus: AttendanceStatus = currentStatus === 'checked_in' ? 'not_checked_in' : 'checked_in';
+    const res = await awsService.markAttendance(teamId, nextStatus);
+    if (res.success) {
+      loadAdminData();
+      if (selectedTeamModal && selectedTeamModal.id === teamId) {
+        setSelectedTeamModal({ ...selectedTeamModal, attendanceStatus: nextStatus });
+      }
+    }
+  };
+
   const filteredTeams = teams.filter((t) => {
     const matchesSearch =
       t.teamName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.leadEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.ticketPassId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (t.submission?.projectTitle || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesTrack =
@@ -110,12 +155,11 @@ export const AdminCartridge: React.FC = () => {
       'Members Count',
       'Project Title',
       'Track',
-      'GitHub Repo',
       'Phase 2 Status',
-      'RSVP',
       'Payment Status',
       'Ticket Pass ID',
-      'Submitted At',
+      'Venue Attendance',
+      'Check-in Time',
     ];
 
     const rows = teams.map((t) => [
@@ -126,12 +170,11 @@ export const AdminCartridge: React.FC = () => {
       t.members.length,
       `"${(t.submission?.projectTitle || 'N/A').replace(/"/g, '""')}"`,
       t.submission?.trackId || 'N/A',
-      t.submission?.githubRepoUrl || 'N/A',
       t.phase2Status || 'pending',
-      t.rsvpConfirmed ? 'Yes' : 'No',
       t.paymentStatus || 'unpaid',
       t.ticketPassId || 'N/A',
-      t.submission?.submittedAt || 'N/A',
+      t.attendanceStatus === 'checked_in' ? 'Present' : 'Absent',
+      t.checkInTimestamp || 'N/A',
     ]);
 
     const csvContent =
@@ -141,7 +184,7 @@ export const AdminCartridge: React.FC = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Cognitia2026_Submissions_${Date.now()}.csv`);
+    link.setAttribute('download', `Cognitia2026_Attendance_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -236,7 +279,8 @@ export const AdminCartridge: React.FC = () => {
   const totalTeams = teams.length;
   const totalSubmissions = teams.filter((t) => t.submission).length;
   const totalPhase2Selected = teams.filter((t) => t.phase2Status === 'selected').length;
-  const totalTicketsIssued = teams.filter((t) => t.paymentStatus === 'payment_verified').length;
+  const totalPhase2Waitlisted = teams.filter((t) => t.phase2Status === 'waitlisted').length;
+  const totalCheckedIn = teams.filter((t) => t.attendanceStatus === 'checked_in').length;
 
   return (
     <div className="flex flex-col h-full justify-between gap-2.5 select-none overflow-y-auto" id="cartridge-admin-console">
@@ -248,11 +292,11 @@ export const AdminCartridge: React.FC = () => {
               ADMIN CONSOLE
             </span>
             <span className="bg-[#182418] text-[#a7d38a] border border-[#254225] font-silkscreen text-[7px] px-1.5 py-0.5 rounded-xs">
-              LIVE SYSTEM
+              LIVE ATTENDANCE SYSTEM
             </span>
           </div>
           <p className="font-silkscreen text-[8px] text-[#8f9396]">
-            COGNITIA 2026 &bull; SUBMISSIONS &amp; PHASE 2 PAYMENT VERIFICATION
+            COGNITIA 2026 &bull; SUBMISSIONS, WAITLIST &amp; VENUE ATTENDANCE SCANNER
           </p>
         </div>
 
@@ -273,9 +317,9 @@ export const AdminCartridge: React.FC = () => {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-5 gap-2">
         <div className="p-2 bg-[#141618] border-2 border-[#2b2e30] rounded-md text-center">
-          <span className="font-silkscreen text-[7px] text-[#8f9396] block uppercase">REGISTERED TEAMS</span>
+          <span className="font-silkscreen text-[7px] text-[#8f9396] block uppercase">REGISTERED</span>
           <span className="font-pixel text-[14px] text-[#6fb3d9]">{totalTeams}</span>
         </div>
         <div className="p-2 bg-[#141618] border-2 border-[#2b2e30] rounded-md text-center">
@@ -283,13 +327,58 @@ export const AdminCartridge: React.FC = () => {
           <span className="font-pixel text-[14px] text-[#a7d38a]">{totalSubmissions}</span>
         </div>
         <div className="p-2 bg-[#141618] border-2 border-[#2b2e30] rounded-md text-center">
-          <span className="font-silkscreen text-[7px] text-[#8f9396] block uppercase">PHASE 2 SELECTED</span>
+          <span className="font-silkscreen text-[7px] text-[#8f9396] block uppercase">SELECTED</span>
           <span className="font-pixel text-[14px] text-[#b180ff]">{totalPhase2Selected}</span>
         </div>
         <div className="p-2 bg-[#141618] border-2 border-[#2b2e30] rounded-md text-center">
-          <span className="font-silkscreen text-[7px] text-[#8f9396] block uppercase">TICKETS ISSUED</span>
-          <span className="font-pixel text-[14px] text-[#f4c151]">{totalTicketsIssued}</span>
+          <span className="font-silkscreen text-[7px] text-[#8f9396] block uppercase">WAITLISTED</span>
+          <span className="font-pixel text-[14px] text-[#f2933d]">{totalPhase2Waitlisted}</span>
         </div>
+        <div className="p-2 bg-[#141618] border-2 border-[#2b2e30] rounded-md text-center">
+          <span className="font-silkscreen text-[7px] text-[#8f9396] block uppercase">VENUE CHECKED-IN</span>
+          <span className="font-pixel text-[14px] text-[#a7d38a]">{totalCheckedIn}</span>
+        </div>
+      </div>
+
+      {/* OFFLINE VENUE ATTENDANCE SCANNER BAR */}
+      <div className="p-3 bg-[#141618] border-2 border-[#a7d38a] rounded-md space-y-2">
+        <div className="flex items-center justify-between border-b border-[#254225] pb-1.5">
+          <span className="font-pixel text-[10px] text-[#a7d38a] flex items-center gap-1.5">
+            <QrCode size={14} /> VENUE ATTENDANCE SCANNER (QR &amp; TICKET PASS ID SEARCH)
+          </span>
+          <span className="font-silkscreen text-[7px] text-[#8f9396]">
+            Scan Pass QR or Type Ticket ID (e.g. COGNITIA-2026-PASS-8921)
+          </span>
+        </div>
+
+        {scanMessage && (
+          <div
+            className={`p-2 rounded-xs border font-silkscreen text-[8px] flex items-center gap-1.5 ${
+              scanMessage.type === 'success'
+                ? 'bg-[#142417] border-[#25522b] text-[#86efac]'
+                : 'bg-[#261414] border-[#522525] text-[#fca5a5]'
+            }`}
+          >
+            {scanMessage.type === 'success' ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />}
+            <span>{scanMessage.text}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleAttendanceScanSubmit} className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Scan Ticket QR code or enter Pass ID / Team ID..."
+            value={scanQuery}
+            onChange={(e) => setScanQuery(e.target.value)}
+            className="flex-1 bg-[#090b0d] border border-[#254225] text-[#a7d38a] font-mono text-xs px-2.5 py-1.5 rounded-xs focus:border-[#a7d38a] focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="bg-[#182418] border border-[#254225] hover:border-[#a7d38a] font-pixel text-[8px] text-[#a7d38a] uppercase px-3 py-1.5 rounded-xs flex items-center gap-1 cursor-pointer"
+          >
+            <UserCheck size={12} /> MARK PRESENT
+          </button>
+        </form>
       </div>
 
       {/* Controls Bar */}
@@ -298,7 +387,7 @@ export const AdminCartridge: React.FC = () => {
           <Search size={12} className="absolute left-2 top-2 text-[#8f9396]" />
           <input
             type="text"
-            placeholder="Search teams, lead emails, titles..."
+            placeholder="Search teams, ticket IDs, lead emails..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-[#090b0d] border border-[#2b2e30] text-[#cfe8ff] font-sans text-xs pl-6 pr-2 py-1 rounded-xs focus:outline-none"
@@ -326,9 +415,9 @@ export const AdminCartridge: React.FC = () => {
               <tr>
                 <th className="p-2">Team Name</th>
                 <th className="p-2">Lead Email</th>
-                <th className="p-2">Project</th>
                 <th className="p-2">Phase 2 Status</th>
-                <th className="p-2">Payment Status</th>
+                <th className="p-2">Ticket / Payment</th>
+                <th className="p-2">Venue Attendance</th>
                 <th className="p-2 text-right">Actions</th>
               </tr>
             </thead>
@@ -342,37 +431,62 @@ export const AdminCartridge: React.FC = () => {
               ) : (
                 filteredTeams.map((t) => (
                   <tr key={t.id} className="hover:bg-[#1b1f24]">
-                    <td className="p-2 font-semibold text-[#cfe8ff]">{t.teamName}</td>
-                    <td className="p-2 text-[#6fb3d9] font-mono">{t.leadEmail}</td>
-                    <td className="p-2 text-[#d6e2eb]">
-                      {t.submission?.projectTitle || <span className="text-[#64696d] italic font-silkscreen text-[8px]">No submission</span>}
+                    <td className="p-2 font-semibold text-[#cfe8ff]">
+                      {t.teamName}
+                      {t.ticketPassId && (
+                        <span className="block font-mono text-[9px] text-[#8f9396]">{t.ticketPassId}</span>
+                      )}
                     </td>
+                    <td className="p-2 text-[#6fb3d9] font-mono">{t.leadEmail}</td>
                     <td className="p-2">
-                      <button
-                        onClick={() => handleTogglePhase2Selection(t.id, t.phase2Status)}
+                      <select
+                        value={t.phase2Status || 'pending'}
+                        onChange={(e) => handlePhase2StatusChange(t.id, e.target.value as Phase2SelectionStatus)}
                         className={`font-silkscreen text-[7px] px-1.5 py-0.5 rounded-xs border cursor-pointer ${
                           t.phase2Status === 'selected'
                             ? 'bg-[#2b1f3d] text-[#b180ff] border-[#b180ff]'
-                            : 'bg-[#181b1e] text-[#8f9396] border-[#2b2e30] hover:text-[#b180ff]'
+                            : t.phase2Status === 'waitlisted'
+                            ? 'bg-[#241d14] text-[#f2933d] border-[#423325]'
+                            : t.phase2Status === 'not_selected'
+                            ? 'bg-[#261414] text-[#eb5147] border-[#522525]'
+                            : 'bg-[#181b1e] text-[#8f9396] border-[#2b2e30]'
                         }`}
                       >
-                        {t.phase2Status === 'selected' ? '✓ SELECTED FOR P2' : '+ SELECT FOR P2'}
-                      </button>
+                        <option value="pending">PENDING EVAL</option>
+                        <option value="selected">SELECTED</option>
+                        <option value="waitlisted">WAITLISTED</option>
+                        <option value="not_selected">NOT SELECTED</option>
+                      </select>
                     </td>
                     <td className="p-2">
                       {t.paymentStatus === 'payment_verified' ? (
                         <span className="bg-[#182418] text-[#a7d38a] border border-[#254225] font-silkscreen text-[7px] px-1.5 py-0.5 rounded-xs">
-                          TICKET ISSUED ({t.ticketPassId})
+                          TICKET ISSUED
                         </span>
                       ) : t.paymentStatus === 'payment_pending' ? (
                         <span className="bg-[#241d14] text-[#f2933d] border border-[#423325] font-silkscreen text-[7px] px-1.5 py-0.5 rounded-xs animate-pulse">
-                          PAYMENT PENDING REVIEW
+                          PAYMENT PENDING
                         </span>
                       ) : (
                         <span className="bg-[#1c1f24] text-[#8f9396] border border-[#2b2e30] font-silkscreen text-[7px] px-1.5 py-0.5 rounded-xs">
                           UNPAID
                         </span>
                       )}
+                    </td>
+                    <td className="p-2">
+                      <button
+                        onClick={() => handleToggleAttendanceStatus(t.id, t.attendanceStatus)}
+                        className={`font-silkscreen text-[7px] px-2 py-0.5 rounded-xs border flex items-center gap-1 cursor-pointer ${
+                          t.attendanceStatus === 'checked_in'
+                            ? 'bg-[#182418] text-[#a7d38a] border-[#254225]'
+                            : 'bg-[#1c1f24] text-[#8f9396] border-[#2b2e30] hover:text-[#a7d38a]'
+                        }`}
+                      >
+                        <UserCheck size={10} />
+                        {t.attendanceStatus === 'checked_in'
+                          ? `PRESENT (${t.checkInTimestamp || 'OK'})`
+                          : 'MARK PRESENT'}
+                      </button>
                     </td>
                     <td className="p-2 text-right">
                       <button
@@ -401,7 +515,7 @@ export const AdminCartridge: React.FC = () => {
             <div className="flex items-center justify-between border-b border-[#2b2e30] pb-2">
               <div>
                 <span className="font-silkscreen text-[8px] text-[#8f9396] uppercase block">
-                  SUBMISSION &amp; PAYMENT INSPECTOR
+                  SUBMISSION &amp; ATTENDANCE INSPECTOR
                 </span>
                 <span className="font-pixel text-[12px] text-[#f4c151]">
                   {selectedTeamModal.teamName}
@@ -415,24 +529,44 @@ export const AdminCartridge: React.FC = () => {
               </button>
             </div>
 
-            {/* Phase 2 Selection Toggle */}
+            {/* Offline Attendance Toggle Box */}
+            <div className="flex items-center justify-between bg-[#090b0d] border border-[#254225] p-2.5 rounded-xs">
+              <div>
+                <span className="font-pixel text-[9px] text-[#a7d38a] block">VENUE ATTENDANCE CONTROL</span>
+                <span className="font-silkscreen text-[8px] text-[#8f9396]">
+                  Status: {selectedTeamModal.attendanceStatus === 'checked_in' ? `Checked in at ${selectedTeamModal.checkInTimestamp || 'Venue'}` : 'Not Checked In'}
+                </span>
+              </div>
+              <button
+                onClick={() => handleToggleAttendanceStatus(selectedTeamModal.id, selectedTeamModal.attendanceStatus)}
+                className={`font-pixel text-[8px] px-2.5 py-1 rounded-xs border cursor-pointer ${
+                  selectedTeamModal.attendanceStatus === 'checked_in'
+                    ? 'bg-[#182418] text-[#a7d38a] border-[#254225]'
+                    : 'bg-[#1c1f24] text-[#8f9396] border-[#2b2e30] hover:text-[#a7d38a]'
+                }`}
+              >
+                {selectedTeamModal.attendanceStatus === 'checked_in' ? 'TOGGLE ABSENT' : 'MARK PRESENT AT VENUE'}
+              </button>
+            </div>
+
+            {/* Phase 2 Selection Selector */}
             <div className="flex items-center justify-between bg-[#090b0d] border border-[#2b2e30] p-2.5 rounded-xs">
               <div>
-                <span className="font-pixel text-[9px] text-[#b180ff] block">PHASE 2 OFFLINE SELECTION STATUS</span>
+                <span className="font-pixel text-[9px] text-[#b180ff] block">PHASE 2 SELECTION STATUS</span>
                 <span className="font-silkscreen text-[8px] text-[#8f9396]">
                   Current Status: {selectedTeamModal.phase2Status || 'pending'}
                 </span>
               </div>
-              <button
-                onClick={() => handleTogglePhase2Selection(selectedTeamModal.id, selectedTeamModal.phase2Status)}
-                className={`font-pixel text-[8px] px-2.5 py-1 rounded-xs border cursor-pointer ${
-                  selectedTeamModal.phase2Status === 'selected'
-                    ? 'bg-[#2b1f3d] text-[#b180ff] border-[#b180ff]'
-                    : 'bg-[#181b1e] text-[#a7d38a] border-[#254225]'
-                }`}
+              <select
+                value={selectedTeamModal.phase2Status || 'pending'}
+                onChange={(e) => handlePhase2StatusChange(selectedTeamModal.id, e.target.value as Phase2SelectionStatus)}
+                className="font-pixel text-[8px] bg-[#1c1f24] border border-[#3a4149] text-[#b180ff] px-2 py-1 rounded-xs"
               >
-                {selectedTeamModal.phase2Status === 'selected' ? 'REVOKE SELECTION' : 'MARK SELECTED FOR PHASE 2'}
-              </button>
+                <option value="pending">PENDING EVAL</option>
+                <option value="selected">SELECTED FOR PHASE 2</option>
+                <option value="waitlisted">WAITLISTED FOR PHASE 2</option>
+                <option value="not_selected">NOT SELECTED</option>
+              </select>
             </div>
 
             {/* Payment & Ticket Verification */}
@@ -547,7 +681,7 @@ export const AdminCartridge: React.FC = () => {
 
       {/* Footer */}
       <div className="pt-2 border-t border-[#26282a] flex items-center justify-between text-[8px] font-silkscreen text-[#7d8285]">
-        <span>COGNITIA SUBMISSIONS &amp; PHASE 2 TICKETING</span>
+        <span>COGNITIA ATTENDANCE &amp; TICKETING CONTROL</span>
         <span className="text-[#a7d38a]">COGNITIA 2026 ADMIN</span>
       </div>
     </div>

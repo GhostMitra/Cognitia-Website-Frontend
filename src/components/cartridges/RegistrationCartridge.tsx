@@ -27,6 +27,7 @@ import {
   Calendar,
   Clock,
   Sparkles,
+  Hourglass,
 } from 'lucide-react';
 import { awsService } from '../../services/awsService';
 import { TeamRegistration, TeamMember } from '../../types';
@@ -538,6 +539,11 @@ export const RegistrationCartridge: React.FC = () => {
                 <Sparkles size={9} /> PHASE 2 SELECTED
               </span>
             )}
+            {activeLeadTeam.phase2Status === 'waitlisted' && (
+              <span className="bg-[#241d14] text-[#f2933d] border border-[#423325] font-silkscreen text-[7px] px-1.5 py-0.5 rounded-xs flex items-center gap-1">
+                <Hourglass size={9} /> WAITLISTED
+              </span>
+            )}
           </div>
           <p className="font-silkscreen text-[8px] text-[#8f9396]">
             Lead: {activeLeadTeam.leadEmail} &bull; ID: {activeLeadTeam.id}
@@ -887,7 +893,18 @@ export const RegistrationCartridge: React.FC = () => {
                 <Clock size={14} /> PHASE 1 EVALUATION IN PROGRESS
               </div>
               <p className="font-silkscreen text-[8px] text-[#8f9396]">
-                Your Phase 1 project deliverables are under evaluation by the Cognitia Jury. Once selected for the Phase 2 Offline Round, your RSVP and Dynamic UPI Payment portal will be unlocked here!
+                Your Phase 1 project deliverables are under evaluation by the Cognitia Jury. Selection status for the offline round will be updated soon.
+              </p>
+            </div>
+          )}
+
+          {activeLeadTeam.phase2Status === 'waitlisted' && (
+            <div className="p-4 bg-[#141618] border-2 border-[#423325] rounded-md text-center space-y-2">
+              <div className="inline-flex items-center gap-1.5 bg-[#241d14] text-[#f2933d] border border-[#423325] font-pixel text-[9px] px-3 py-1 rounded-xs">
+                <Hourglass size={14} /> WAITLISTED FOR PHASE 2 OFFLINE ROUND
+              </div>
+              <p className="font-silkscreen text-[8px] text-[#cfe8ff]">
+                Your team is currently on the official Cognitia Phase 2 Waitlist. If a confirmed spot opens up, the jury will promote your team, and you will be notified to confirm RSVP &amp; proceed to payment!
               </p>
             </div>
           )}
@@ -1031,9 +1048,16 @@ export const RegistrationCartridge: React.FC = () => {
                               OFFICIAL PARTICIPANT ENTRY TICKET
                             </span>
                           </div>
-                          <span className="bg-[#182418] text-[#a7d38a] border border-[#254225] font-mono text-[9px] font-bold px-2 py-0.5 rounded-xs">
-                            {activeLeadTeam.ticketPassId}
-                          </span>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="bg-[#182418] text-[#a7d38a] border border-[#254225] font-mono text-[9px] font-bold px-2 py-0.5 rounded-xs">
+                              {activeLeadTeam.ticketPassId}
+                            </span>
+                            {activeLeadTeam.attendanceStatus === 'checked_in' && (
+                              <span className="bg-[#182418] text-[#a7d38a] border border-[#254225] font-silkscreen text-[7px] px-1.5 py-0.5 rounded-xs flex items-center gap-1">
+                                <CheckCircle2 size={8} /> VENUE CHECKED IN ({activeLeadTeam.checkInTimestamp || 'CONFIRMED'})
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {/* Team Info & Event Metadata */}

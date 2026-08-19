@@ -102,8 +102,9 @@ export interface ProjectSubmission {
   updatedAt: string;
 }
 
-export type Phase2SelectionStatus = 'pending' | 'selected' | 'not_selected';
+export type Phase2SelectionStatus = 'pending' | 'selected' | 'waitlisted' | 'not_selected';
 export type Phase2PaymentStatus = 'unpaid' | 'payment_pending' | 'payment_verified';
+export type AttendanceStatus = 'not_checked_in' | 'checked_in';
 
 export interface TeamRegistration {
   id: string;
@@ -122,4 +123,7 @@ export interface TeamRegistration {
   paymentSubmittedAt?: string;
   ticketPassId?: string;
   ticketIssuedAt?: string;
+  // Offline Attendance Fields
+  attendanceStatus?: AttendanceStatus;
+  checkInTimestamp?: string;
 }

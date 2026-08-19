@@ -1,4 +1,11 @@
-import { TeamRegistration, ProjectSubmission, TeamMember, Phase2SelectionStatus, Phase2PaymentStatus } from '../types';
+import {
+  TeamRegistration,
+  ProjectSubmission,
+  TeamMember,
+  Phase2SelectionStatus,
+  Phase2PaymentStatus,
+  AttendanceStatus,
+} from '../types';
 
 const STORAGE_KEY_TEAMS = 'cognitia_aws_teams_v1';
 const STORAGE_KEY_AUTH = 'cognitia_lead_session_v1';
@@ -121,6 +128,7 @@ class AWSService {
       registeredAt: new Date().toISOString(),
       phase2Status: 'pending',
       paymentStatus: 'unpaid',
+      attendanceStatus: 'not_checked_in',
       members: [
         {
           id: `mem-lead-${Date.now()}`,
@@ -235,9 +243,9 @@ class AWSService {
     return { success: true, submission };
   }
 
-  // PHASE 2 OFFLINE ROUND METHODS
+  // PHASE 2 OFFLINE ROUND & SELECTION METHODS
 
-  // Admin updates team Phase 2 selection status ('selected' | 'not_selected' | 'pending')
+  // Admin updates team Phase 2 selection status ('selected' | 'waitlisted' | 'not_selected' | 'pending')
   public async updatePhase2Selection(
     teamId: string,
     status: Phase2SelectionStatus
@@ -292,6 +300,31 @@ class AWSService {
     this.saveToStorage();
 
     return { success: true, team, ticketId };
+  }
+
+  // OFFLINE ATTENDANCE CHECK-IN METHOD
+  public async markAttendance(
+    query: string,
+    status: AttendanceStatus
+  ): Promise<{ success: boolean; team?: TeamRegistration; message?: string }> {
+    const clean = query.trim().toLowerCase();
+    if (!clean) return { success: false, message: 'Please enter a valid Pass Ticket ID or Team ID.' };
+
+    const team = this.teams.find(
+      (t) =>
+        t.id.toLowerCase() === clean ||
+        (t.ticketPassId && t.ticketPassId.toLowerCase() === clean)
+    );
+
+    if (!team) {
+      return { success: false, message: `No registered team matching Ticket/ID '${query}' was found.` };
+    }
+
+    team.attendanceStatus = status;
+    team.checkInTimestamp = status === 'checked_in' ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : undefined;
+    this.saveToStorage();
+
+    return { success: true, team };
   }
 
   // Admin Access Methods
