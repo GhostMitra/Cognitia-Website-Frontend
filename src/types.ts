@@ -120,6 +120,7 @@ export interface TeamRegistration {
   rsvpConfirmed?: boolean;
   paymentStatus?: Phase2PaymentStatus;
   paymentScreenshotUrl?: string;
+  paymentTransactionId?: string;
   paymentSubmittedAt?: string;
   ticketPassId?: string;
   ticketIssuedAt?: string;

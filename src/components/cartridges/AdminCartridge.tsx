@@ -21,7 +21,7 @@ import {
   QrCode,
   UserCheck,
   Hourglass,
-  RefreshCw,
+  Hash,
 } from 'lucide-react';
 import { awsService } from '../../services/awsService';
 import { TeamRegistration, Phase2SelectionStatus, AttendanceStatus } from '../../types';
@@ -137,6 +137,7 @@ export const AdminCartridge: React.FC = () => {
       t.teamName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.leadEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (t.ticketPassId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.paymentTransactionId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (t.submission?.projectTitle || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesTrack =
@@ -157,6 +158,7 @@ export const AdminCartridge: React.FC = () => {
       'Track',
       'Phase 2 Status',
       'Payment Status',
+      'UPI Transaction ID',
       'Ticket Pass ID',
       'Venue Attendance',
       'Check-in Time',
@@ -172,6 +174,7 @@ export const AdminCartridge: React.FC = () => {
       t.submission?.trackId || 'N/A',
       t.phase2Status || 'pending',
       t.paymentStatus || 'unpaid',
+      t.paymentTransactionId || 'N/A',
       t.ticketPassId || 'N/A',
       t.attendanceStatus === 'checked_in' ? 'Present' : 'Absent',
       t.checkInTimestamp || 'N/A',
@@ -292,7 +295,7 @@ export const AdminCartridge: React.FC = () => {
               ADMIN CONSOLE
             </span>
             <span className="bg-[#182418] text-[#a7d38a] border border-[#254225] font-silkscreen text-[7px] px-1.5 py-0.5 rounded-xs">
-              LIVE ATTENDANCE SYSTEM
+              LIVE SYSTEM
             </span>
           </div>
           <p className="font-silkscreen text-[8px] text-[#8f9396]">
@@ -387,7 +390,7 @@ export const AdminCartridge: React.FC = () => {
           <Search size={12} className="absolute left-2 top-2 text-[#8f9396]" />
           <input
             type="text"
-            placeholder="Search teams, ticket IDs, lead emails..."
+            placeholder="Search teams, ticket IDs, transaction IDs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-[#090b0d] border border-[#2b2e30] text-[#cfe8ff] font-sans text-xs pl-6 pr-2 py-1 rounded-xs focus:outline-none"
@@ -577,6 +580,13 @@ export const AdminCartridge: React.FC = () => {
                   Status: {selectedTeamModal.paymentStatus || 'unpaid'}
                 </span>
               </div>
+
+              {selectedTeamModal.paymentTransactionId && (
+                <div className="p-2 bg-[#182418] border border-[#254225] rounded-xs font-mono text-xs text-[#a7d38a] flex items-center justify-between">
+                  <span>UPI TX / UTR REF ID:</span>
+                  <span className="font-bold text-white">{selectedTeamModal.paymentTransactionId}</span>
+                </div>
+              )}
 
               {selectedTeamModal.paymentScreenshotUrl ? (
                 <div className="space-y-2">

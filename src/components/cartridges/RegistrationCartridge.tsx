@@ -28,6 +28,7 @@ import {
   Clock,
   Sparkles,
   Hourglass,
+  Hash,
 } from 'lucide-react';
 import { awsService } from '../../services/awsService';
 import { TeamRegistration, TeamMember } from '../../types';
@@ -73,6 +74,7 @@ export const RegistrationCartridge: React.FC = () => {
 
   // Phase 2 State
   const [paymentScreenshot, setPaymentScreenshot] = useState<string>('');
+  const [paymentTxId, setPaymentTxId] = useState<string>('');
   const [isUploadingPayment, setIsUploadingPayment] = useState(false);
   const ticketRef = useRef<HTMLDivElement>(null);
 
@@ -88,6 +90,9 @@ export const RegistrationCartridge: React.FC = () => {
       setMembers(current.members || []);
       if (current.paymentScreenshotUrl) {
         setPaymentScreenshot(current.paymentScreenshotUrl);
+      }
+      if (current.paymentTransactionId) {
+        setPaymentTxId(current.paymentTransactionId);
       }
       if (current.submission) {
         setProjectTitle(current.submission.projectTitle || '');
@@ -322,16 +327,21 @@ export const RegistrationCartridge: React.FC = () => {
 
   const handlePaymentScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !activeLeadTeam) return;
+    if (!paymentTxId.trim()) {
+      alert('Please enter your UPI Transaction ID / UTR Ref Number before uploading receipt.');
+      return;
+    }
+
     const file = e.target.files[0];
     setIsUploadingPayment(true);
     try {
       const res = await awsService.uploadFileToS3(file, 'payments');
-      const submitRes = await awsService.submitPaymentScreenshot(activeLeadTeam.id, res.url);
+      const submitRes = await awsService.submitPaymentScreenshot(activeLeadTeam.id, res.url, paymentTxId);
       if (submitRes.success && submitRes.team) {
         sound.playBoot();
         setActiveLeadTeam(submitRes.team);
         setPaymentScreenshot(res.url);
-        alert('Payment receipt screenshot submitted for admin verification!');
+        alert('Payment receipt and Transaction ID submitted for admin verification!');
       }
     } catch {
       alert('Payment screenshot upload failed.');
@@ -977,14 +987,28 @@ export const RegistrationCartridge: React.FC = () => {
                             <p className="text-[#cfe8ff] font-pixel text-[8px]">PAYMENT INSTRUCTIONS:</p>
                             <p>1. Open Google Pay, PhonePe, Paytm, or BHIM.</p>
                             <p>2. Scan the dynamic QR code above. Amount &amp; Remark will be auto-filled.</p>
-                            <p>3. Complete ₹500 payment and take a screenshot of the transaction ID.</p>
-                            <p>4. Upload the screenshot below for admin verification.</p>
+                            <p>3. Complete ₹500 payment and copy the Transaction / UTR ID.</p>
+                            <p>4. Enter Transaction ID &amp; upload receipt screenshot below.</p>
+                          </div>
+
+                          <div>
+                            <label className="block font-silkscreen text-[8px] text-[#8f9396] mb-1 flex items-center gap-1">
+                              <Hash size={10} /> UPI Transaction ID / UTR Ref Number <span className="text-[#eb5147]">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              placeholder="e.g. 429183749012 or UPI/123456"
+                              value={paymentTxId}
+                              onChange={(e) => setPaymentTxId(e.target.value)}
+                              className="w-full bg-[#090b0d] border border-[#2b2e30] text-[#f4c151] font-mono text-xs px-2.5 py-1.5 rounded-xs focus:border-[#f4c151] focus:outline-none"
+                            />
                           </div>
 
                           {activeLeadTeam.paymentStatus === 'payment_pending' && (
                             <div className="p-2 bg-[#182418] border border-[#254225] text-[#a7d38a] font-silkscreen text-[8px] flex items-center gap-1.5 rounded-xs">
                               <CheckCircle2 size={12} className="shrink-0" />
-                              <span>Payment screenshot uploaded! Admin verification in progress.</span>
+                              <span>Payment submitted! Tx ID: {paymentTxId}</span>
                             </div>
                           )}
 
@@ -993,7 +1017,7 @@ export const RegistrationCartridge: React.FC = () => {
                             {isUploadingPayment
                               ? 'UPLOADING RECEIPT...'
                               : activeLeadTeam.paymentStatus === 'payment_pending'
-                              ? 'RE-UPLOAD PAYMENT RECEIPT'
+                              ? 'UPDATE PAYMENT RECEIPT'
                               : 'UPLOAD PAYMENT SCREENSHOT'}
                             <input
                               type="file"
@@ -1069,6 +1093,11 @@ export const RegistrationCartridge: React.FC = () => {
                             <p className="text-[#8f9396]">
                               LEAD: {activeLeadTeam.leadEmail} ({activeLeadTeam.leadPhone})
                             </p>
+                            {activeLeadTeam.paymentTransactionId && (
+                              <p className="text-[#f4c151] font-mono">
+                                TX ID: {activeLeadTeam.paymentTransactionId}
+                              </p>
+                            )}
 
                             <div className="pt-1.5 space-y-1 text-[#cfe8ff]">
                               <p className="flex items-center gap-1 text-[#a7d38a]">

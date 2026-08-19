@@ -268,16 +268,18 @@ class AWSService {
     return { success: true, team };
   }
 
-  // Participant uploads Phase 2 payment screenshot
+  // Participant uploads Phase 2 payment screenshot and transaction ID / UTR
   public async submitPaymentScreenshot(
     teamId: string,
-    screenshotUrl: string
+    screenshotUrl: string,
+    transactionId?: string
   ): Promise<{ success: boolean; team?: TeamRegistration }> {
     const team = this.teams.find((t) => t.id === teamId);
     if (!team) return { success: false };
 
     team.paymentStatus = 'payment_pending';
     team.paymentScreenshotUrl = screenshotUrl;
+    team.paymentTransactionId = transactionId || team.paymentTransactionId;
     team.paymentSubmittedAt = new Date().toISOString();
     this.saveToStorage();
 
