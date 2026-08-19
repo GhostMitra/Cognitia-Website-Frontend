@@ -33,10 +33,21 @@ import {
 import { awsService } from '../../services/awsService';
 import { TeamRegistration, TeamMember } from '../../types';
 import { sound } from '../../utils/audio';
+import { RetroInput } from '../RetroInput';
 
-export const RegistrationCartridge: React.FC = () => {
+interface RegistrationCartridgeProps {
+  defaultLoginMode?: boolean;
+}
+
+export const RegistrationCartridge: React.FC<RegistrationCartridgeProps> = ({
+  defaultLoginMode = false,
+}) => {
   const [activeLeadTeam, setActiveLeadTeam] = useState<TeamRegistration | null>(null);
-  const [isLoginMode, setIsLoginMode] = useState<boolean>(false);
+  const [isLoginMode, setIsLoginMode] = useState<boolean>(defaultLoginMode);
+
+  useEffect(() => {
+    setIsLoginMode(defaultLoginMode);
+  }, [defaultLoginMode]);
   const [authError, setAuthError] = useState<string>('');
   const [authSuccess, setAuthSuccess] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'team' | 'submission' | 'phase2'>('team');
@@ -422,94 +433,65 @@ export const RegistrationCartridge: React.FC = () => {
             <form onSubmit={handleAuthSubmit} className="space-y-3">
               {!isLoginMode && (
                 <>
-                  <div>
-                    <label className="block font-silkscreen text-[8px] text-[#8f9396] mb-1">
-                      Team Name <span className="text-[#eb5147]">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Cyber Spiders"
-                      value={teamName}
-                      onChange={(e) => setTeamName(e.target.value)}
-                      className="w-full bg-[#090b0d] border border-[#2b2e30] text-[#cfe8ff] font-sans text-xs px-2.5 py-1.5 rounded-xs focus:border-[#f4c151] focus:outline-none"
-                    />
-                  </div>
+                  <RetroInput
+                    label="Team Name"
+                    required
+                    placeholder="e.g. Cyber Spiders"
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                  />
 
-                  <div>
-                    <label className="block font-silkscreen text-[8px] text-[#8f9396] mb-1">
-                      Team Lead Full Name <span className="text-[#eb5147]">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Peter Parker"
-                      value={leadName}
-                      onChange={(e) => setLeadName(e.target.value)}
-                      className="w-full bg-[#090b0d] border border-[#2b2e30] text-[#cfe8ff] font-sans text-xs px-2.5 py-1.5 rounded-xs focus:border-[#f4c151] focus:outline-none"
-                    />
-                  </div>
+                  <RetroInput
+                    label="Team Lead Full Name"
+                    required
+                    placeholder="e.g. Peter Parker"
+                    value={leadName}
+                    onChange={(e) => setLeadName(e.target.value)}
+                  />
                 </>
               )}
 
-              <div>
-                <label className="block font-silkscreen text-[8px] text-[#8f9396] mb-1 flex items-center gap-1">
-                  <Mail size={10} /> Lead Email Address <span className="text-[#eb5147]">*</span>
-                </label>
-                <input
-                  type="email"
-                  required
-                  placeholder="lead@hackathon.org"
-                  value={leadEmail}
-                  onChange={(e) => setLeadEmail(e.target.value)}
-                  className="w-full bg-[#090b0d] border border-[#2b2e30] text-[#cfe8ff] font-sans text-xs px-2.5 py-1.5 rounded-xs focus:border-[#f4c151] focus:outline-none"
-                />
-              </div>
+              <RetroInput
+                label="Lead Email Address"
+                icon={<Mail size={10} />}
+                required
+                type="email"
+                placeholder="lead@hackathon.org"
+                value={leadEmail}
+                onChange={(e) => setLeadEmail(e.target.value)}
+              />
 
               {!isLoginMode && (
-                <div>
-                  <label className="block font-silkscreen text-[8px] text-[#8f9396] mb-1 flex items-center gap-1">
-                    <Phone size={10} /> Lead Phone Number <span className="text-[#eb5147]">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="+1 (555) 019-2834"
-                    value={leadPhone}
-                    onChange={(e) => setLeadPhone(e.target.value)}
-                    className="w-full bg-[#090b0d] border border-[#2b2e30] text-[#cfe8ff] font-sans text-xs px-2.5 py-1.5 rounded-xs focus:border-[#f4c151] focus:outline-none"
-                  />
-                </div>
+                <RetroInput
+                  label="Lead Phone Number"
+                  icon={<Phone size={10} />}
+                  required
+                  type="tel"
+                  placeholder="+1 (555) 019-2834"
+                  value={leadPhone}
+                  onChange={(e) => setLeadPhone(e.target.value)}
+                />
               )}
 
-              <div>
-                <label className="block font-silkscreen text-[8px] text-[#8f9396] mb-1 flex items-center gap-1">
-                  <Lock size={10} /> Password <span className="text-[#eb5147]">*</span>
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={leadPassword}
-                  onChange={(e) => setLeadPassword(e.target.value)}
-                  className="w-full bg-[#090b0d] border border-[#2b2e30] text-[#cfe8ff] font-sans text-xs px-2.5 py-1.5 rounded-xs focus:border-[#f4c151] focus:outline-none"
-                />
-              </div>
+              <RetroInput
+                label="Password"
+                icon={<Lock size={10} />}
+                required
+                type="password"
+                placeholder="••••••••"
+                value={leadPassword}
+                onChange={(e) => setLeadPassword(e.target.value)}
+              />
 
               {!isLoginMode && (
-                <div>
-                  <label className="block font-silkscreen text-[8px] text-[#8f9396] mb-1 flex items-center gap-1">
-                    <Github size={10} /> Lead GitHub Handle <span className="text-[#eb5147]">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. peterparker-dev"
-                    value={leadGithub}
-                    onChange={(e) => setLeadGithub(e.target.value)}
-                    className="w-full bg-[#090b0d] border border-[#2b2e30] text-[#cfe8ff] font-sans text-xs px-2.5 py-1.5 rounded-xs focus:border-[#f4c151] focus:outline-none"
-                  />
-                </div>
+                <RetroInput
+                  label="Lead GitHub Handle"
+                  icon={<Github size={10} />}
+                  required
+                  placeholder="e.g. peterparker-dev"
+                  value={leadGithub}
+                  onChange={(e) => setLeadGithub(e.target.value)}
+                />
               )}
 
               <button
@@ -1159,4 +1141,8 @@ export const RegistrationCartridge: React.FC = () => {
       </div>
     </div>
   );
+};
+
+export const LoginCartridge: React.FC = () => {
+  return <RegistrationCartridge defaultLoginMode={true} />;
 };

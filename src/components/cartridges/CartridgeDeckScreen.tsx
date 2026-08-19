@@ -15,7 +15,8 @@ interface MenuPageItem {
 
 const MENU_PAGES: MenuPageItem[] = [
   { id: 'dashboard', name: 'DASHBOARD' },
-  { id: 'register', name: 'REGISTER & SUBMIT' },
+  { id: 'register', name: 'REGISTER TEAM' },
+  { id: 'login', name: 'TEAM LOGIN' },
   { id: 'rules', name: 'RULES' },
   { id: 'tracks', name: 'TRACKS' },
   { id: 'timeline', name: 'SCHEDULE' },

@@ -12,22 +12,72 @@ import { SponsorsCartridge } from './components/cartridges/SponsorsCartridge';
 import { MembersCartridge } from './components/cartridges/MembersCartridge';
 import { PrizesCartridge } from './components/cartridges/PrizesCartridge';
 import { FAQCartridge } from './components/cartridges/FAQCartridge';
-import { RegistrationCartridge } from './components/cartridges/RegistrationCartridge';
+import { RegistrationCartridge, LoginCartridge } from './components/cartridges/RegistrationCartridge';
 import { AdminCartridge } from './components/cartridges/AdminCartridge';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { PWAConsoleScreen } from './components/PWAConsoleScreen';
+import { ThemeLoadingScreen, RetroThemeId } from './components/ThemeLoadingScreen';
+import { CartridgeSwapLoader } from './components/CartridgeSwapLoader';
 import { CartridgeId } from './types';
 import { sound } from './utils/audio';
 
 export default function App() {
   const [currentCartridge, setCurrentCartridge] = useState<CartridgeId>('dashboard');
   const [isDeckOpen, setIsDeckOpen] = useState<boolean>(false);
+  const [isBooting, setIsBooting] = useState<boolean>(true);
+  const [showPwaScreen, setShowPwaScreen] = useState<boolean>(false);
+  const [isSwitchingCartridge, setIsSwitchingCartridge] = useState<boolean>(false);
+  const [targetCartridgeName, setTargetCartridgeName] = useState<string>('');
+  const [activeTheme, setActiveTheme] = useState<RetroThemeId>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('cognitia_theme') as RetroThemeId) || 'cognitia-gold';
+    }
+    return 'cognitia-gold';
+  });
   const [showScanlines] = useState<boolean>(true);
   const [countdown, setCountdown] = useState({ days: 12, hours: 8, mins: 44, secs: 20 });
 
-  // Initial path routing check (e.g., /admin, /register)
+  const handleThemeChange = (th: RetroThemeId) => {
+    setActiveTheme(th);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cognitia_theme', th);
+    }
+  };
+
+  const handleBootComplete = () => {
+    setIsBooting(false);
+    if (typeof window !== 'undefined') {
+      const isDismissed = localStorage.getItem('cognitia_pwa_prompt_dismissed') === 'true';
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
+      if (!isDismissed && !isStandalone) {
+        setShowPwaScreen(true);
+      }
+    }
+  };
+
+  const getCartridgeNameById = (id: CartridgeId) => {
+    switch (id) {
+      case 'dashboard': return 'DASHBOARD';
+      case 'register': return 'REGISTER TEAM';
+      case 'login': return 'TEAM LOGIN';
+      case 'rules': return 'RULES & REGS';
+      case 'tracks': return 'TRACKS';
+      case 'timeline': return 'SCHEDULE';
+      case 'sponsors': return 'SPONSORS';
+      case 'members': return 'MEMBERS';
+      case 'prizes': return 'PRIZES';
+      case 'faq': return 'FAQ';
+      case 'admin': return 'ADMIN PORTAL';
+    }
+  };
+
+  // Initial path routing check (e.g., /admin, /login, /register)
   useEffect(() => {
     const path = window.location.pathname.toLowerCase();
     if (path.includes('admin')) {
       setCurrentCartridge('admin');
+    } else if (path.includes('login')) {
+      setCurrentCartridge('login');
     } else if (path.includes('register') || path.includes('submit')) {
       setCurrentCartridge('register');
     }
@@ -49,12 +99,26 @@ export default function App() {
 
   const handleSelectCartridge = (id: CartridgeId) => {
     if (id !== currentCartridge) {
-      setCurrentCartridge(id);
+      sound.playClick();
+      const targetName = getCartridgeNameById(id);
+      setTargetCartridgeName(targetName);
+      setIsSwitchingCartridge(true);
+      setShowPwaScreen(false);
+
+      setTimeout(() => {
+        setCurrentCartridge(id);
+        setIsSwitchingCartridge(false);
+      }, 420);
+    } else {
+      setShowPwaScreen(false);
     }
   };
 
   const handleResetBoot = () => {
     sound.playBoot();
+    setIsBooting(true);
+    setShowPwaScreen(false);
+    setIsSwitchingCartridge(false);
     setCurrentCartridge('dashboard');
     setIsDeckOpen(false);
   };
@@ -67,6 +131,8 @@ export default function App() {
 
       if (e.key === 'm' || e.key === 'M') {
         sound.toggleMute();
+      } else if (e.key === 'r' || e.key === 'R') {
+        handleResetBoot();
       } else if (e.key === 'Escape') {
         setIsDeckOpen(false);
       } else if (e.key === 'Tab') {
@@ -79,25 +145,25 @@ export default function App() {
         handleSelectCartridge('register');
         setIsDeckOpen(false);
       } else if (e.key === '3') {
-        handleSelectCartridge('rules');
+        handleSelectCartridge('login');
         setIsDeckOpen(false);
       } else if (e.key === '4') {
-        handleSelectCartridge('tracks');
+        handleSelectCartridge('rules');
         setIsDeckOpen(false);
       } else if (e.key === '5') {
-        handleSelectCartridge('timeline');
+        handleSelectCartridge('tracks');
         setIsDeckOpen(false);
       } else if (e.key === '6') {
-        handleSelectCartridge('sponsors');
+        handleSelectCartridge('timeline');
         setIsDeckOpen(false);
       } else if (e.key === '7') {
-        handleSelectCartridge('members');
+        handleSelectCartridge('sponsors');
         setIsDeckOpen(false);
       } else if (e.key === '8') {
-        handleSelectCartridge('prizes');
+        handleSelectCartridge('members');
         setIsDeckOpen(false);
       } else if (e.key === '9') {
-        handleSelectCartridge('faq');
+        handleSelectCartridge('prizes');
         setIsDeckOpen(false);
       }
     };
@@ -107,12 +173,17 @@ export default function App() {
   }, []);
 
   const getStatusText = () => {
+    if (isBooting) return 'COGNITIA 2026 • INITIALIZING CONSOLE HARDWARE...';
+    if (isSwitchingCartridge) return `MOUNTING ${targetCartridgeName} CARTRIDGE...`;
+    if (showPwaScreen) return 'COGNITIA 2K26 PWA INSTALLATION MODULE';
     if (isDeckOpen) return 'SELECTING ROM CARTRIDGE MODULE...';
     switch (currentCartridge) {
       case 'dashboard':
         return 'COGNITIA 2026 • 30-HOUR SPRINT • ₹22,000 CASH POOL';
       case 'register':
-        return 'PARTICIPANT LEAD REGISTRATION & SUBMISSION PORTAL';
+        return 'TEAM LEADER REGISTRATION PORTAL';
+      case 'login':
+        return 'PARTICIPANT TEAM LOGIN & SUBMISSION PORTAL';
       case 'rules':
         return 'RULES & ETHICS PROTOCOL';
       case 'tracks':
@@ -133,9 +204,13 @@ export default function App() {
   };
 
   const getCartridgeName = () => {
+    if (isBooting) return 'INITIALIZING';
+    if (isSwitchingCartridge) return targetCartridgeName || 'SWAPPING ROM';
+    if (showPwaScreen) return 'INSTALL PWA';
     switch (currentCartridge) {
       case 'dashboard': return 'DASHBOARD';
-      case 'register': return 'REGISTER & SUBMIT';
+      case 'register': return 'REGISTER TEAM';
+      case 'login': return 'TEAM LOGIN';
       case 'rules': return 'RULES & REGS';
       case 'tracks': return 'TRACKS';
       case 'timeline': return 'SCHEDULE';
@@ -148,12 +223,12 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b132b] via-[#0d1b3e] to-[#040817] text-white flex flex-col items-center">
+    <div className="min-h-screen bg-gradient-to-b from-[#0b132b] via-[#0d1b3e] to-[#040817] text-white flex flex-col items-center relative">
       {/* 
         SCREEN 1: Full-Viewport Fitted Pixel Console HUD
-        - Fits 100% inside initial screen window
+        - Fits 100% inside screen window with internal cartridge viewport scrolling
       */}
-      <section className="w-full h-screen min-h-[580px] max-h-[100dvh] flex flex-col justify-center items-center p-2 sm:p-3 md:p-4 box-border">
+      <section className="w-full h-screen min-h-[580px] max-h-[100dvh] flex flex-col justify-center items-center p-1.5 sm:p-3 md:p-4 box-border shrink-0">
         <ConsoleShell
           currentCartridge={currentCartridge}
           onSelectCartridge={(id) => {
@@ -167,13 +242,31 @@ export default function App() {
             <div className="flex-1 min-w-0 min-h-0 flex flex-col h-full">
               <ScreenViewport
                 scanlinesEnabled={showScanlines}
-                activeCartridgeId={currentCartridge}
+                activeCartridgeId={isBooting ? 'BOOT' : isSwitchingCartridge ? 'SWAP' : showPwaScreen ? 'PWA' : currentCartridge}
                 cartridgeName={getCartridgeName()}
-                isMenuOpen={isDeckOpen}
-                onToggleMenu={() => setIsDeckOpen((prev) => !prev)}
+                isMenuOpen={isDeckOpen && !isBooting && !showPwaScreen && !isSwitchingCartridge}
+                onToggleMenu={() => !isBooting && !showPwaScreen && !isSwitchingCartridge && setIsDeckOpen((prev) => !prev)}
               >
-                {/* Content Area */}
-                {isDeckOpen ? (
+                {/* Content Area - Internal Cartridge Viewport Scrolling */}
+                {isBooting ? (
+                  <ThemeLoadingScreen
+                    currentTheme={activeTheme}
+                    onThemeChange={handleThemeChange}
+                    onBootComplete={handleBootComplete}
+                  />
+                ) : isSwitchingCartridge ? (
+                  <ThemeLoadingScreen
+                    isFastSwitch={true}
+                    currentTheme={activeTheme}
+                    onThemeChange={handleThemeChange}
+                    targetCartridgeName={targetCartridgeName}
+                    onBootComplete={() => setIsSwitchingCartridge(false)}
+                  />
+                ) : showPwaScreen ? (
+                  <PWAConsoleScreen
+                    onContinueToDashboard={() => setShowPwaScreen(false)}
+                  />
+                ) : isDeckOpen ? (
                   <CartridgeDeckScreen
                     currentCartridge={currentCartridge}
                     onSelectCartridge={(id) => {
@@ -192,7 +285,8 @@ export default function App() {
                         }}
                       />
                     )}
-                    {currentCartridge === 'register' && <RegistrationCartridge />}
+                    {currentCartridge === 'register' && <RegistrationCartridge defaultLoginMode={false} />}
+                    {currentCartridge === 'login' && <LoginCartridge />}
                     {currentCartridge === 'rules' && <RulesCartridge />}
                     {currentCartridge === 'tracks' && <TracksCartridge />}
                     {currentCartridge === 'timeline' && <TimelineCartridge />}
@@ -206,24 +300,23 @@ export default function App() {
               </ScreenViewport>
             </div>
 
-            {/* Bottom Bar: Separate Individual Countdown Boxes & Audio Button */}
-            <BottomBar
-              statusText={getStatusText()}
-              isCountdown={currentCartridge === 'dashboard' && !isDeckOpen}
-              countdown={countdown}
-            />
+            {/* Bottom Bar: Full-Width Countdown Timer */}
+            <BottomBar countdown={countdown} />
+
           </div>
         </ConsoleShell>
       </section>
 
       {/* 
-        SCREEN 2: Real-World Marketing & Design System Footer
+        SCREEN 2: Real-World Marketing & Design System Footer (Outside Console)
         - Visible upon scrolling down
       */}
-      <footer className="w-full px-2 sm:px-4 md:px-6 pb-8 pt-4">
+      <footer className="w-full px-2 sm:px-4 md:px-6 pb-8 pt-4 shrink-0">
         <Footer />
       </footer>
     </div>
   );
 }
+
+
 

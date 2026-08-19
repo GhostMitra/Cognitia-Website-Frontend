@@ -6,7 +6,12 @@ type MuteListener = (isMuted: boolean) => void;
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
-  private isMutedState: boolean = false;
+  private isMutedState: boolean = (() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('cognitia_muted') === 'true';
+    }
+    return false;
+  })();
   private listeners: Set<MuteListener> = new Set();
 
   private initCtx() {
@@ -23,6 +28,9 @@ class SoundEngine {
 
   public setMuted(muted: boolean) {
     this.isMutedState = muted;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cognitia_muted', String(muted));
+    }
     this.listeners.forEach((fn) => fn(muted));
   }
 

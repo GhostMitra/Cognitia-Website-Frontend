@@ -8,6 +8,7 @@ export type CartridgeId =
   | 'prizes'
   | 'faq'
   | 'register'
+  | 'login'
   | 'admin';
 
 export type BadgeTone = 'orange' | 'white' | 'red';

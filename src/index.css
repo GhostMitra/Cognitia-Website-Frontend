@@ -6,7 +6,62 @@
     color: #ffffff;
     font-family: 'Space Grotesk', sans-serif;
     overflow-x: hidden;
+    cursor: auto;
   }
+}
+
+/* 8-Bit Spider-Man Custom Cursors - Strictly Scoped INSIDE Console HUD */
+#pixel-console-hud-root,
+#pixel-console-hud-root * {
+  cursor: url('/spidey-cursor.svg') 4 4, auto;
+}
+
+#pixel-console-hud-root button,
+#pixel-console-hud-root a,
+#pixel-console-hud-root select,
+#pixel-console-hud-root input[type="submit"],
+#pixel-console-hud-root input[type="button"],
+#pixel-console-hud-root input[type="checkbox"],
+#pixel-console-hud-root [role="button"],
+#pixel-console-hud-root .cursor-pointer {
+  cursor: url('/spidey-pointer.svg') 16 16, pointer !important;
+}
+
+/* 8-Bit Textboxes & Input Fonts (Case-Sensitive VT323 8-Bit Pixel Typography & Cyan Caret) */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+textarea,
+select {
+  font-family: 'VT323', monospace !important;
+  font-size: 16px !important;
+  letter-spacing: 0.05em !important;
+  text-transform: none !important;
+  caret-color: #00f0ff !important;
+  cursor: url('/spidey-text-cursor.svg') 16 16, text !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  font-family: 'VT323', monospace !important;
+  font-size: 16px !important;
+  opacity: 0.65;
+  text-transform: none !important;
+  cursor: url('/spidey-text-cursor.svg') 16 16, text !important;
+}
+
+/* Retro Cyan Text Highlight Selection */
+::selection {
+  background-color: #00f0ff !important;
+  color: #090b0d !important;
+}
+
+::-moz-selection {
+  background-color: #00f0ff !important;
+  color: #090b0d !important;
 }
 
 /* Custom Pixel & Retro Fonts from Google Fonts */
@@ -18,7 +73,8 @@
   font-family: 'Silkscreen', cursive;
 }
 
-.font-mono-retro {
+.font-mono-retro,
+.font-vt323 {
   font-family: 'VT323', monospace;
 }
 
@@ -32,22 +88,18 @@
 
 /* Scanlines overlay effect for CRT screen */
 .scanline-overlay {
-  background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%, 
-    rgba(0, 0, 0, 0.4) 50%
-  ), linear-gradient(
-    90deg,
-    rgba(255, 0, 0, 0.04),
-    rgba(0, 255, 0, 0.02),
-    rgba(0, 0, 255, 0.04)
-  );
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%,
+      rgba(0, 0, 0, 0.4) 50%), linear-gradient(90deg,
+      rgba(255, 0, 0, 0.04),
+      rgba(0, 255, 0, 0.02),
+      rgba(0, 0, 255, 0.04));
   background-size: 100% 3px, 4px 100%;
 }
 
 /* Custom 8-bit Pixel Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -63,6 +115,24 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #505860;
+}
+
+.retro-viewport-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+
+.retro-viewport-scroll::-webkit-scrollbar-track {
+  background: #101214;
+  border-left: 1px solid #000;
+}
+
+.retro-viewport-scroll::-webkit-scrollbar-thumb {
+  background: #f4c151;
+  border: 1px solid #000;
+}
+
+.retro-viewport-scroll::-webkit-scrollbar-thumb:hover {
+  background: #ffe58f;
 }
 
 /* Pixel Art Image Rendering for sharp scaling */
@@ -86,6 +156,7 @@
   from {
     background-position: 0px 0px;
   }
+
   to {
     background-position: -1700px 0px;
   }
@@ -100,9 +171,12 @@
 }
 
 @keyframes shortSway {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: rotate(-3deg);
   }
+
   50% {
     transform: rotate(3deg);
   }
@@ -118,6 +192,7 @@
   from {
     background-position: 0px 0px;
   }
+
   to {
     background-position: -3726px 0px;
   }
@@ -126,3 +201,12 @@
 .animate-spidey-head-turn {
   animation: spideyHeadTurnRealSprite 1.8s steps(46) infinite;
 }
+
+/* Hide scrollbar for clean UI overflow containers */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
