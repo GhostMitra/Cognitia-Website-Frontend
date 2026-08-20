@@ -638,51 +638,91 @@ export const AdminCartridge: React.FC = () => {
                 </button>
               </div>
 
-              {/* Offline Attendance Toggle Box */}
-              <div className="flex items-center justify-between bg-[#090b0d] border border-[#254225] p-2.5 rounded-xs">
-                <div>
-                  <span className="font-pixel text-[9px] text-[#a7d38a] block">VENUE ATTENDANCE CONTROL</span>
-                  <span className="font-silkscreen text-[8px] text-[#8f9396]">
-                    Status: {selectedTeamModal.attendanceStatus === 'checked_in' ? `Checked in at ${selectedTeamModal.checkInTimestamp || 'Venue'}` : 'Not Checked In'}
-                  </span>
+              {/* EVENT STAGE 1: BASIC TEAM REGISTRATION */}
+              <div className="bg-[#090b0d] border border-[#2b2e30] p-3 rounded-xs space-y-1.5 font-silkscreen text-[8.5px]">
+                <span className="font-pixel text-[9px] text-[#f4c151] block border-b border-[#2b2e30] pb-1">
+                  STAGE 1: TEAM REGISTRATION &amp; IDENTIFIER
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[#cfe8ff]">
+                  <p>TEAM ID: <span className="font-mono text-white font-bold">{selectedTeamModal.id}</span></p>
+                  <p>REGISTERED AT: <span className="text-[#8f9396]">{selectedTeamModal.registeredAt || 'Phase 1 Launch'}</span></p>
+                  <p>LEAD EMAIL: <span className="text-[#6fb3d9] font-mono">{selectedTeamModal.leadEmail}</span></p>
+                  <p>LEAD PHONE: <span className="text-[#a7d38a] font-mono">{selectedTeamModal.leadPhone}</span></p>
                 </div>
-                <button
-                  onClick={() => handleToggleAttendanceStatus(selectedTeamModal.id, selectedTeamModal.attendanceStatus)}
-                  className={`font-pixel text-[8px] px-2.5 py-1 rounded-xs border cursor-pointer ${
-                    selectedTeamModal.attendanceStatus === 'checked_in'
-                      ? 'bg-[#182418] text-[#a7d38a] border-[#254225]'
-                      : 'bg-[#1c1f24] text-[#8f9396] border-[#2b2e30] hover:text-[#a7d38a]'
-                  }`}
-                >
-                  {selectedTeamModal.attendanceStatus === 'checked_in' ? 'TOGGLE ABSENT' : 'MARK PRESENT AT VENUE'}
-                </button>
               </div>
 
-              {/* Phase 2 Selection Selector */}
-              <div className="flex items-center justify-between bg-[#090b0d] border border-[#2b2e30] p-2.5 rounded-xs">
-                <div>
-                  <span className="font-pixel text-[9px] text-[#b180ff] block">PHASE 2 SELECTION STATUS</span>
-                  <span className="font-silkscreen text-[8px] text-[#8f9396]">
-                    Current Status: {selectedTeamModal.phase2Status || 'pending'}
+              {/* EVENT STAGE 2: TEAM MEMBERS ROSTER & DETAILS */}
+              <div className="bg-[#090b0d] border border-[#2b2e30] p-3 rounded-xs space-y-2">
+                <div className="flex items-center justify-between border-b border-[#2b2e30] pb-1.5">
+                  <span className="font-pixel text-[9px] text-[#6fb3d9] flex items-center gap-1.5">
+                    <Users size={12} /> STAGE 2: TEAM MEMBERS ROSTER ({selectedTeamModal.members.length})
+                  </span>
+                  <span className={`font-silkscreen text-[7.5px] px-2 py-0.5 rounded-xs border ${
+                    selectedTeamModal.isMembersLocked ? 'bg-[#182418] text-[#a7d38a] border-[#254225]' : 'bg-[#241d14] text-[#f2933d] border-[#423325]'
+                  }`}>
+                    {selectedTeamModal.isMembersLocked ? 'ROSTER LOCKED' : 'ROSTER UNLOCKED'}
                   </span>
                 </div>
-                <select
-                  value={selectedTeamModal.phase2Status || 'pending'}
-                  onChange={(e) => handlePhase2StatusChange(selectedTeamModal.id, e.target.value as Phase2SelectionStatus)}
-                  className="font-pixel text-[8px] bg-[#1c1f24] border border-[#3a4149] text-[#b180ff] px-2 py-1 rounded-xs cursor-pointer"
-                >
-                  <option value="pending">PENDING EVAL</option>
-                  <option value="selected">SELECTED FOR PHASE 2</option>
-                  <option value="waitlisted">WAITLISTED FOR PHASE 2</option>
-                  <option value="not_selected">NOT SELECTED</option>
-                </select>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {selectedTeamModal.members.map((m, idx) => (
+                    <div key={m.id || idx} className="p-2.5 bg-[#141618] border border-[#2b2e30] rounded-xs font-sans text-xs space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-[#cfe8ff] text-sm flex items-center gap-1">
+                          {m.name}
+                          {m.isLead && <span className="text-[#f2933d] font-silkscreen text-[8px] px-1 py-0.5 bg-[#241d14] border border-[#423325] rounded-xs">(LEAD)</span>}
+                        </span>
+                        <span className="text-[#8f9396] font-silkscreen text-[8px] bg-[#1c1f24] px-1.5 py-0.5 rounded-xs border border-[#2b2e30]">
+                          {m.role || 'Member'}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-0.5 font-silkscreen text-[8px] text-[#8f9396] pt-0.5">
+                        {m.email && <p className="text-[#cfe8ff] flex items-center gap-1"><Mail size={9} className="text-[#6fb3d9]" /> {m.email}</p>}
+                        {m.phone && <p className="text-[#cfe8ff] flex items-center gap-1"><Phone size={9} className="text-[#a7d38a]" /> {m.phone}</p>}
+                        {m.githubId && <p className="text-[#6fb3d9] font-mono flex items-center gap-1"><Github size={9} /> @{m.githubId}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* SECTION 1: PHASE 1 REGISTRATION FEE (₹50) PAYMENT VERIFICATION */}
+              {/* EVENT STAGE 3: TRACK PREFERENCES ORDER */}
+              <div className="bg-[#090b0d] border border-[#2b2e30] p-3 rounded-xs space-y-2">
+                <div className="flex items-center justify-between border-b border-[#2b2e30] pb-1.5">
+                  <span className="font-pixel text-[9px] text-[#f4c151] flex items-center gap-1.5">
+                    <Target size={12} /> STAGE 3: TRACK PREFERENCES ORDER
+                  </span>
+                  <span className={`font-silkscreen text-[7.5px] px-2 py-0.5 rounded-xs border ${
+                    selectedTeamModal.isTrackLocked ? 'bg-[#182418] text-[#a7d38a] border-[#254225]' : 'bg-[#241d14] text-[#f2933d] border-[#423325]'
+                  }`}>
+                    {selectedTeamModal.isTrackLocked ? 'LOCKED & CONFIRMED' : 'UNLOCKED PREFERENCES'}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 font-silkscreen text-[8.5px]">
+                  {selectedTeamModal.trackPreferences && selectedTeamModal.trackPreferences.filter(Boolean).length > 0 ? (
+                    selectedTeamModal.trackPreferences.filter(Boolean).map((track, idx) => (
+                      <div key={idx} className="flex items-center gap-2 p-1.5 bg-[#141618] border border-[#2b2e30] rounded-xs">
+                        <span className="font-pixel text-[8px] text-[#f4c151] px-1.5 py-0.5 bg-[#2b2414] rounded-xs border border-[#423325] shrink-0">
+                          #{idx + 1} CHOICE
+                        </span>
+                        <span className="text-[#cfe8ff] font-bold truncate">{track}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-[#8f9396] italic col-span-2 p-1 bg-[#141618]">
+                      Selected Track: {selectedTeamModal.selectedTrack || 'General Track (No preferences locked)'}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* EVENT STAGE 4: PHASE 1 REGISTRATION FEE (₹50) PAYMENT VERIFICATION */}
               <div className="bg-[#090b0d] border border-[#2b2e30] p-3 rounded-xs space-y-2.5">
                 <div className="flex items-center justify-between border-b border-[#2b2e30] pb-2">
                   <span className="font-pixel text-[9.5px] text-[#f4c151] flex items-center gap-1.5">
-                    <CreditCard size={13} /> PHASE 1 REGISTRATION FEE (₹50) VERIFICATION
+                    <CreditCard size={13} /> STAGE 4: PHASE 1 ENTRY FEE (₹50) VERIFICATION
                   </span>
                   <span className={`font-silkscreen text-[8px] px-2 py-0.5 rounded-xs border ${
                     selectedTeamModal.paymentStatus === 'payment_verified'
@@ -731,11 +771,85 @@ export const AdminCartridge: React.FC = () => {
                 </div>
               </div>
 
-              {/* SECTION 2: PHASE 2 OFFLINE ROUND ENTRY FEE PAYMENT VERIFICATION */}
+              {/* EVENT STAGE 5: PHASE 1 PROJECT DELIVERABLES & EVALUATION */}
+              <div className="bg-[#090b0d] border border-[#2b2e30] p-3 rounded-xs space-y-2">
+                <span className="font-pixel text-[9px] text-[#a7d38a] uppercase block border-b border-[#2b2e30] pb-1">
+                  STAGE 5: PROJECT DELIVERABLES &amp; EVALUATION RESPONSES
+                </span>
+
+                {selectedTeamModal.submission ? (
+                  <div className="space-y-2 pt-1">
+                    <div className="p-2.5 bg-[#141618] border border-[#2b2e30] rounded-xs space-y-1">
+                      <p className="font-pixel text-[11px] text-[#f4c151]">{selectedTeamModal.submission.projectTitle}</p>
+                      {selectedTeamModal.submission.tagline && (
+                        <p className="font-sans text-xs text-[#8f9396] italic">{selectedTeamModal.submission.tagline}</p>
+                      )}
+                      {selectedTeamModal.submission.githubRepoUrl && (
+                        <p className="font-mono text-[9px] text-[#6fb3d9] pt-1">
+                          GITHUB REPO: <a href={selectedTeamModal.submission.githubRepoUrl} target="_blank" rel="noopener noreferrer" className="underline">{selectedTeamModal.submission.githubRepoUrl}</a>
+                        </p>
+                      )}
+                    </div>
+
+                    {selectedTeamModal.submission.proposedSolution && (
+                      <div className="p-2.5 bg-[#141618] border border-[#2b2e30] rounded-xs space-y-1">
+                        <span className="font-pixel text-[8.5px] text-[#f4c151] block">1. PROPOSED SOLUTION &amp; IMPLEMENTATION:</span>
+                        <p className="font-sans text-xs text-[#cfe8ff] whitespace-pre-wrap bg-[#090b0d] p-2 rounded-xs border border-[#2b2e30] leading-relaxed">
+                          {selectedTeamModal.submission.proposedSolution}
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedTeamModal.submission.techStackJustification && (
+                      <div className="p-2.5 bg-[#141618] border border-[#2b2e30] rounded-xs space-y-1">
+                        <span className="font-pixel text-[8.5px] text-[#00f0ff] block">2. TECH STACK &amp; JUSTIFICATION:</span>
+                        <p className="font-sans text-xs text-[#cfe8ff] whitespace-pre-wrap bg-[#090b0d] p-2 rounded-xs border border-[#2b2e30] leading-relaxed">
+                          {selectedTeamModal.submission.techStackJustification}
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedTeamModal.submission.deploymentStrategy && (
+                      <div className="p-2.5 bg-[#141618] border border-[#2b2e30] rounded-xs space-y-1">
+                        <span className="font-pixel text-[8.5px] text-[#a7d38a] block">3. SCALABLE DEPLOYMENT STRATEGY:</span>
+                        <p className="font-sans text-xs text-[#cfe8ff] whitespace-pre-wrap bg-[#090b0d] p-2 rounded-xs border border-[#2b2e30] leading-relaxed">
+                          {selectedTeamModal.submission.deploymentStrategy}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-2 bg-[#241d14] border border-[#423325] text-[#f2933d] font-silkscreen text-[8px] text-center rounded-xs">
+                    THIS TEAM HAS NOT UPLOADED FINAL PROJECT DELIVERABLES YET.
+                  </div>
+                )}
+              </div>
+
+              {/* EVENT STAGE 6: PHASE 2 SELECTION & RSVP */}
+              <div className="flex items-center justify-between bg-[#090b0d] border border-[#2b2e30] p-2.5 rounded-xs">
+                <div>
+                  <span className="font-pixel text-[9px] text-[#b180ff] block">STAGE 6: PHASE 2 SELECTION STATUS</span>
+                  <span className="font-silkscreen text-[8px] text-[#8f9396]">
+                    Status: {selectedTeamModal.phase2Status || 'pending'} &bull; RSVP: {selectedTeamModal.rsvpConfirmed ? 'CONFIRMED' : 'NOT CONFIRMED'}
+                  </span>
+                </div>
+                <select
+                  value={selectedTeamModal.phase2Status || 'pending'}
+                  onChange={(e) => handlePhase2StatusChange(selectedTeamModal.id, e.target.value as Phase2SelectionStatus)}
+                  className="font-pixel text-[8px] bg-[#1c1f24] border border-[#3a4149] text-[#b180ff] px-2 py-1 rounded-xs cursor-pointer"
+                >
+                  <option value="pending">PENDING EVAL</option>
+                  <option value="selected">SELECTED FOR PHASE 2</option>
+                  <option value="waitlisted">WAITLISTED FOR PHASE 2</option>
+                  <option value="not_selected">NOT SELECTED</option>
+                </select>
+              </div>
+
+              {/* EVENT STAGE 7: PHASE 2 ENTRY FEE (₹500) & TICKET PASS */}
               <div className="bg-[#090b0d] border border-[#2b2e30] p-3 rounded-xs space-y-2.5">
                 <div className="flex items-center justify-between border-b border-[#2b2e30] pb-2">
                   <span className="font-pixel text-[9.5px] text-[#b180ff] flex items-center gap-1.5">
-                    <Ticket size={13} /> PHASE 2 OFFLINE ENTRY FEE VERIFICATION
+                    <Ticket size={13} /> STAGE 7: PHASE 2 ENTRY FEE (₹500) &amp; PASS
                   </span>
                   <span className={`font-silkscreen text-[8px] px-2 py-0.5 rounded-xs border ${
                     selectedTeamModal.phase2PaymentStatus === 'payment_verified'
@@ -765,16 +879,12 @@ export const AdminCartridge: React.FC = () => {
 
                 {selectedTeamModal.phase2PaymentScreenshotUrl &&
                   (selectedTeamModal.phase2PaymentScreenshotUrl.startsWith('http') || selectedTeamModal.phase2PaymentScreenshotUrl.startsWith('data:image')) &&
-                  !selectedTeamModal.phase2PaymentScreenshotUrl.includes('placeholder') ? (
+                  !selectedTeamModal.phase2PaymentScreenshotUrl.includes('placeholder') && (
                   <div className="space-y-1">
                     <span className="font-silkscreen text-[8px] text-[#b180ff] block">PHASE 2 SUBMITTED RECEIPT:</span>
                     <div className="border border-[#2b2e30] rounded-xs overflow-hidden h-40 bg-black">
                       <img src={selectedTeamModal.phase2PaymentScreenshotUrl} alt="Phase 2 Payment Receipt" className="w-full h-full object-contain" />
                     </div>
-                  </div>
-                ) : (
-                  <div className="p-1.5 bg-[#141618] border border-[#2b2e30] rounded-xs font-silkscreen text-[8px] text-[#7d8285]">
-                    No Phase 2 payment receipt uploaded yet.
                   </div>
                 )}
 
@@ -798,119 +908,25 @@ export const AdminCartridge: React.FC = () => {
                 )}
               </div>
 
-              {/* SECTION: TRACK PREFERENCES ORDER */}
-              <div className="bg-[#090b0d] border border-[#2b2e30] p-3 rounded-xs space-y-2">
-                <div className="flex items-center justify-between border-b border-[#2b2e30] pb-1.5">
-                  <span className="font-pixel text-[9px] text-[#f4c151] flex items-center gap-1.5">
-                    <Target size={12} /> FULL TRACK PREFERENCES ORDER
-                  </span>
-                  <span className={`font-silkscreen text-[7.5px] px-2 py-0.5 rounded-xs border ${
-                    selectedTeamModal.isTrackLocked ? 'bg-[#182418] text-[#a7d38a] border-[#254225]' : 'bg-[#241d14] text-[#f2933d] border-[#423325]'
-                  }`}>
-                    {selectedTeamModal.isTrackLocked ? 'LOCKED & CONFIRMED' : 'UNLOCKED PREFERENCES'}
+              {/* EVENT STAGE 8: VENUE ATTENDANCE & GATE CHECK-IN CONTROL */}
+              <div className="flex items-center justify-between bg-[#090b0d] border border-[#254225] p-2.5 rounded-xs">
+                <div>
+                  <span className="font-pixel text-[9px] text-[#a7d38a] block">STAGE 8: VENUE GATE CHECK-IN CONTROL</span>
+                  <span className="font-silkscreen text-[8px] text-[#8f9396]">
+                    Status: {selectedTeamModal.attendanceStatus === 'checked_in' ? `Checked in at ${selectedTeamModal.checkInTimestamp || 'Venue'}` : 'Not Checked In'}
                   </span>
                 </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 font-silkscreen text-[8.5px]">
-                  {selectedTeamModal.trackPreferences && selectedTeamModal.trackPreferences.filter(Boolean).length > 0 ? (
-                    selectedTeamModal.trackPreferences.filter(Boolean).map((track, idx) => (
-                      <div key={idx} className="flex items-center gap-2 p-1.5 bg-[#141618] border border-[#2b2e30] rounded-xs">
-                        <span className="font-pixel text-[8px] text-[#f4c151] px-1.5 py-0.5 bg-[#2b2414] rounded-xs border border-[#423325] shrink-0">
-                          #{idx + 1} CHOICE
-                        </span>
-                        <span className="text-[#cfe8ff] font-bold truncate">{track}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-[#8f9396] italic col-span-2 p-1 bg-[#141618]">
-                      Selected Track: {selectedTeamModal.selectedTrack || 'General Track (No preferences locked)'}
-                    </div>
-                  )}
-                </div>
+                <button
+                  onClick={() => handleToggleAttendanceStatus(selectedTeamModal.id, selectedTeamModal.attendanceStatus)}
+                  className={`font-pixel text-[8px] px-2.5 py-1 rounded-xs border cursor-pointer ${
+                    selectedTeamModal.attendanceStatus === 'checked_in'
+                      ? 'bg-[#182418] text-[#a7d38a] border-[#254225]'
+                      : 'bg-[#1c1f24] text-[#8f9396] border-[#2b2e30] hover:text-[#a7d38a]'
+                  }`}
+                >
+                  {selectedTeamModal.attendanceStatus === 'checked_in' ? 'TOGGLE ABSENT' : 'MARK PRESENT AT VENUE'}
+                </button>
               </div>
-
-              {/* SECTION: FULL TEAM MEMBERS ROSTER & DETAILS */}
-              <div className="bg-[#090b0d] border border-[#2b2e30] p-3 rounded-xs space-y-2">
-                <div className="flex items-center justify-between border-b border-[#2b2e30] pb-1.5">
-                  <span className="font-pixel text-[9px] text-[#6fb3d9] flex items-center gap-1.5">
-                    <Users size={12} /> FULL TEAM MEMBERS ROSTER &amp; DETAILS ({selectedTeamModal.members.length})
-                  </span>
-                  <span className={`font-silkscreen text-[7.5px] px-2 py-0.5 rounded-xs border ${
-                    selectedTeamModal.isMembersLocked ? 'bg-[#182418] text-[#a7d38a] border-[#254225]' : 'bg-[#241d14] text-[#f2933d] border-[#423325]'
-                  }`}>
-                    {selectedTeamModal.isMembersLocked ? 'ROSTER LOCKED' : 'ROSTER UNLOCKED'}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {selectedTeamModal.members.map((m, idx) => (
-                    <div key={m.id || idx} className="p-2.5 bg-[#141618] border border-[#2b2e30] rounded-xs font-sans text-xs space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[#cfe8ff] text-sm flex items-center gap-1">
-                          {m.name}
-                          {m.isLead && <span className="text-[#f2933d] font-silkscreen text-[8px] px-1 py-0.5 bg-[#241d14] border border-[#423325] rounded-xs">(LEAD)</span>}
-                        </span>
-                        <span className="text-[#8f9396] font-silkscreen text-[8px] bg-[#1c1f24] px-1.5 py-0.5 rounded-xs border border-[#2b2e30]">
-                          {m.role || 'Member'}
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-0.5 font-silkscreen text-[8px] text-[#8f9396] pt-0.5">
-                        {m.email && <p className="text-[#cfe8ff] flex items-center gap-1"><Mail size={9} className="text-[#6fb3d9]" /> {m.email}</p>}
-                        {m.phone && <p className="text-[#cfe8ff] flex items-center gap-1"><Phone size={9} className="text-[#a7d38a]" /> {m.phone}</p>}
-                        {m.githubId && <p className="text-[#6fb3d9] font-mono flex items-center gap-1"><Github size={9} /> @{m.githubId}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Submission Deliverables */}
-              {selectedTeamModal.submission ? (
-                <div className="space-y-2 border-t border-[#2b2e30] pt-2">
-                  <span className="font-silkscreen text-[8px] text-[#a7d38a] uppercase block">
-                    PROJECT DELIVERABLES &amp; EVALUATION RESPONSES:
-                  </span>
-
-                  <div className="p-2.5 bg-[#090b0d] border border-[#2b2e30] rounded-xs space-y-1">
-                    <p className="font-pixel text-[11px] text-[#f4c151]">{selectedTeamModal.submission.projectTitle}</p>
-                    {selectedTeamModal.submission.tagline && (
-                      <p className="font-sans text-xs text-[#8f9396] italic">{selectedTeamModal.submission.tagline}</p>
-                    )}
-                  </div>
-
-                  {selectedTeamModal.submission.proposedSolution && (
-                    <div className="p-2.5 bg-[#090b0d] border border-[#2b2e30] rounded-xs space-y-1">
-                      <span className="font-pixel text-[8.5px] text-[#f4c151] block">1. PROPOSED SOLUTION &amp; IMPLEMENTATION:</span>
-                      <p className="font-sans text-xs text-[#cfe8ff] whitespace-pre-wrap bg-[#141618] p-2 rounded-xs border border-[#2b2e30] leading-relaxed">
-                        {selectedTeamModal.submission.proposedSolution}
-                      </p>
-                    </div>
-                  )}
-
-                  {selectedTeamModal.submission.techStackJustification && (
-                    <div className="p-2.5 bg-[#090b0d] border border-[#2b2e30] rounded-xs space-y-1">
-                      <span className="font-pixel text-[8.5px] text-[#00f0ff] block">2. TECH STACK &amp; JUSTIFICATION:</span>
-                      <p className="font-sans text-xs text-[#cfe8ff] whitespace-pre-wrap bg-[#141618] p-2 rounded-xs border border-[#2b2e30] leading-relaxed">
-                        {selectedTeamModal.submission.techStackJustification}
-                      </p>
-                    </div>
-                  )}
-
-                  {selectedTeamModal.submission.deploymentStrategy && (
-                    <div className="p-2.5 bg-[#090b0d] border border-[#2b2e30] rounded-xs space-y-1">
-                      <span className="font-pixel text-[8.5px] text-[#a7d38a] block">3. SCALABLE DEPLOYMENT STRATEGY:</span>
-                      <p className="font-sans text-xs text-[#cfe8ff] whitespace-pre-wrap bg-[#141618] p-2 rounded-xs border border-[#2b2e30] leading-relaxed">
-                        {selectedTeamModal.submission.deploymentStrategy}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="p-2 bg-[#241d14] border border-[#423325] text-[#f2933d] font-silkscreen text-[8px] text-center rounded-xs">
-                  THIS TEAM HAS NOT UPLOADED FINAL PROJECT DELIVERABLES YET.
-                </div>
-              )}
             </div>
           </div>,
           document.body
