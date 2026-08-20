@@ -23,6 +23,9 @@ import {
   UserCheck,
   Hourglass,
   Hash,
+  Target,
+  Mail,
+  Phone,
 } from 'lucide-react';
 import { awsService } from '../../services/awsService';
 import { TeamRegistration, Phase2SelectionStatus, Phase2PaymentStatus, AttendanceStatus } from '../../types';
@@ -795,19 +798,68 @@ export const AdminCartridge: React.FC = () => {
                 )}
               </div>
 
-              {/* Members Roster */}
-              <div>
-                <span className="font-silkscreen text-[8px] text-[#8f9396] uppercase block mb-1">
-                  TEAM ROSTER &amp; GITHUB HANDLES:
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                  {selectedTeamModal.members.map((m) => (
-                    <div key={m.id} className="p-2 bg-[#090b0d] border border-[#2b2e30] rounded-xs font-sans text-xs">
-                      <p className="font-bold text-[#cfe8ff]">
-                        {m.name} {m.isLead && <span className="text-[#f2933d] font-silkscreen text-[8px]">(LEAD)</span>}
-                      </p>
-                      <p className="text-[#8f9396] font-silkscreen text-[8px]">{m.role}</p>
-                      <p className="text-[#6fb3d9] font-mono mt-0.5"><Github size={9} className="inline" /> @{m.githubId}</p>
+              {/* SECTION: TRACK PREFERENCES ORDER */}
+              <div className="bg-[#090b0d] border border-[#2b2e30] p-3 rounded-xs space-y-2">
+                <div className="flex items-center justify-between border-b border-[#2b2e30] pb-1.5">
+                  <span className="font-pixel text-[9px] text-[#f4c151] flex items-center gap-1.5">
+                    <Target size={12} /> FULL TRACK PREFERENCES ORDER
+                  </span>
+                  <span className={`font-silkscreen text-[7.5px] px-2 py-0.5 rounded-xs border ${
+                    selectedTeamModal.isTrackLocked ? 'bg-[#182418] text-[#a7d38a] border-[#254225]' : 'bg-[#241d14] text-[#f2933d] border-[#423325]'
+                  }`}>
+                    {selectedTeamModal.isTrackLocked ? 'LOCKED & CONFIRMED' : 'UNLOCKED PREFERENCES'}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 font-silkscreen text-[8.5px]">
+                  {selectedTeamModal.trackPreferences && selectedTeamModal.trackPreferences.filter(Boolean).length > 0 ? (
+                    selectedTeamModal.trackPreferences.filter(Boolean).map((track, idx) => (
+                      <div key={idx} className="flex items-center gap-2 p-1.5 bg-[#141618] border border-[#2b2e30] rounded-xs">
+                        <span className="font-pixel text-[8px] text-[#f4c151] px-1.5 py-0.5 bg-[#2b2414] rounded-xs border border-[#423325] shrink-0">
+                          #{idx + 1} CHOICE
+                        </span>
+                        <span className="text-[#cfe8ff] font-bold truncate">{track}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-[#8f9396] italic col-span-2 p-1 bg-[#141618]">
+                      Selected Track: {selectedTeamModal.selectedTrack || 'General Track (No preferences locked)'}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* SECTION: FULL TEAM MEMBERS ROSTER & DETAILS */}
+              <div className="bg-[#090b0d] border border-[#2b2e30] p-3 rounded-xs space-y-2">
+                <div className="flex items-center justify-between border-b border-[#2b2e30] pb-1.5">
+                  <span className="font-pixel text-[9px] text-[#6fb3d9] flex items-center gap-1.5">
+                    <Users size={12} /> FULL TEAM MEMBERS ROSTER &amp; DETAILS ({selectedTeamModal.members.length})
+                  </span>
+                  <span className={`font-silkscreen text-[7.5px] px-2 py-0.5 rounded-xs border ${
+                    selectedTeamModal.isMembersLocked ? 'bg-[#182418] text-[#a7d38a] border-[#254225]' : 'bg-[#241d14] text-[#f2933d] border-[#423325]'
+                  }`}>
+                    {selectedTeamModal.isMembersLocked ? 'ROSTER LOCKED' : 'ROSTER UNLOCKED'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {selectedTeamModal.members.map((m, idx) => (
+                    <div key={m.id || idx} className="p-2.5 bg-[#141618] border border-[#2b2e30] rounded-xs font-sans text-xs space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-[#cfe8ff] text-sm flex items-center gap-1">
+                          {m.name}
+                          {m.isLead && <span className="text-[#f2933d] font-silkscreen text-[8px] px-1 py-0.5 bg-[#241d14] border border-[#423325] rounded-xs">(LEAD)</span>}
+                        </span>
+                        <span className="text-[#8f9396] font-silkscreen text-[8px] bg-[#1c1f24] px-1.5 py-0.5 rounded-xs border border-[#2b2e30]">
+                          {m.role || 'Member'}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-0.5 font-silkscreen text-[8px] text-[#8f9396] pt-0.5">
+                        {m.email && <p className="text-[#cfe8ff] flex items-center gap-1"><Mail size={9} className="text-[#6fb3d9]" /> {m.email}</p>}
+                        {m.phone && <p className="text-[#cfe8ff] flex items-center gap-1"><Phone size={9} className="text-[#a7d38a]" /> {m.phone}</p>}
+                        {m.githubId && <p className="text-[#6fb3d9] font-mono flex items-center gap-1"><Github size={9} /> @{m.githubId}</p>}
+                      </div>
                     </div>
                   ))}
                 </div>

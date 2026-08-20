@@ -2453,29 +2453,60 @@ export const RegistrationCartridge: React.FC<RegistrationCartridgeProps> = ({
                           <div className="bg-[#090b0d] border border-[#2b2e30] p-2 rounded-xs flex flex-col items-center justify-center text-center">
                             <span className="font-pixel text-[7px] text-[#f4c151] mb-1">VENUE CHECK-IN</span>
                             <img
-                              src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
                                 activeLeadTeam.ticketPassId || activeLeadTeam.id
                               )}`}
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = `https://quickchart.io/qr?text=${encodeURIComponent(
+                                  activeLeadTeam.ticketPassId || activeLeadTeam.id
+                                )}&size=200`;
+                              }}
                               alt="Ticket Pass QR"
-                              className="w-20 h-20 border border-white"
+                              className="w-20 h-20 bg-white p-1 rounded-xs border-2 border-[#f4c151] object-contain shadow-md"
                             />
                             <span className="font-mono text-[6px] text-[#8f9396] mt-1">SCAN AT ENTRANCE</span>
                           </div>
                         </div>
 
-                        {/* Roster List */}
-                        <div className="border-t border-[#2b2e30] pt-2">
-                          <span className="font-silkscreen text-[7px] text-[#8f9396] uppercase block mb-1">
-                            ADMITTED TEAM ROSTER ({activeLeadTeam.members.length}):
+                        {/* Full Track Preferences List */}
+                        <div className="border-t border-[#2b2e30] pt-2 space-y-1">
+                          <span className="font-silkscreen text-[7.5px] text-[#f4c151] uppercase block">
+                            FULL TRACK PREFERENCES ORDER:
                           </span>
-                          <div className="flex flex-wrap gap-1.5">
-                            {activeLeadTeam.members.map((m) => (
-                              <span
-                                key={m.id}
-                                className="bg-[#090b0d] border border-[#2b2e30] text-[#cfe8ff] font-silkscreen text-[7px] px-2 py-0.5 rounded-xs"
-                              >
-                                {m.name} {m.isLead ? '(LEAD)' : ''} &bull; @{m.githubId}
+                          <div className="flex flex-wrap gap-1 font-silkscreen text-[7.5px]">
+                            {activeLeadTeam.trackPreferences && activeLeadTeam.trackPreferences.filter(Boolean).length > 0 ? (
+                              activeLeadTeam.trackPreferences.filter(Boolean).map((track, idx) => (
+                                <span key={idx} className="bg-[#090b0d] border border-[#2b2e30] text-[#cfe8ff] px-2 py-0.5 rounded-xs flex items-center gap-1">
+                                  <span className="text-[#f4c151] font-bold">#{idx + 1}:</span> {track}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-[#cfe8ff] bg-[#090b0d] px-2 py-0.5 border border-[#2b2e30] rounded-xs">
+                                {activeLeadTeam.selectedTrack || 'General Track'}
                               </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Full Team Roster & Member Details */}
+                        <div className="border-t border-[#2b2e30] pt-2 space-y-1">
+                          <span className="font-silkscreen text-[7.5px] text-[#a7d38a] uppercase block">
+                            ADMITTED PARTICIPANTS ROSTER ({activeLeadTeam.members.length}):
+                          </span>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 font-silkscreen text-[7.5px]">
+                            {activeLeadTeam.members.map((m, idx) => (
+                              <div key={m.id || idx} className="bg-[#090b0d] border border-[#2b2e30] p-1.5 rounded-xs text-[#cfe8ff]">
+                                <div className="flex items-center justify-between font-bold">
+                                  <span>{m.name} {m.isLead ? '(LEAD)' : ''}</span>
+                                  <span className="text-[#8f9396] font-normal">{m.role || 'Member'}</span>
+                                </div>
+                                <div className="text-[7px] text-[#8f9396] font-mono mt-0.5 flex flex-wrap gap-x-2">
+                                  {m.email && <span>{m.email}</span>}
+                                  {m.phone && <span>{m.phone}</span>}
+                                  {m.githubId && <span className="text-[#6fb3d9]">@{m.githubId}</span>}
+                                </div>
+                              </div>
                             ))}
                           </div>
                         </div>
@@ -2580,26 +2611,64 @@ export const RegistrationCartridge: React.FC<RegistrationCartridgeProps> = ({
                     </p>
                   </div>
 
-                  {/* QR Code Verification Box */}
-                  <div className="flex flex-col items-center justify-center p-2 bg-[#12161a] border border-[#2b2e30] rounded-xs text-center space-y-1">
-                    <QrCode size={64} className="text-[#00f0ff]" />
-                    <span className="font-mono text-[7.5px] text-[#8f9396]">SCAN AT VENUE GATE</span>
+                  {/* Venue Check-In QR */}
+                  <div className="bg-[#090b0d] border border-[#2b2e30] p-2 rounded-xs flex flex-col items-center justify-center text-center">
+                    <span className="font-pixel text-[7px] text-[#f4c151] mb-1">VENUE CHECK-IN</span>
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+                        activeLeadTeam.ticketPassId || activeLeadTeam.id
+                      )}`}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = `https://quickchart.io/qr?text=${encodeURIComponent(
+                          activeLeadTeam.ticketPassId || activeLeadTeam.id
+                        )}&size=200`;
+                      }}
+                      alt="Ticket Pass QR"
+                      className="w-20 h-20 bg-white p-1 rounded-xs border-2 border-[#f4c151] object-contain shadow-md"
+                    />
+                    <span className="font-mono text-[6px] text-[#8f9396] mt-1">SCAN AT ENTRANCE</span>
                   </div>
                 </div>
 
-                {/* Roster List */}
-                <div className="border-t border-[#2b2e30] pt-2">
-                  <span className="font-silkscreen text-[7px] text-[#8f9396] uppercase block mb-1">
-                    ADMITTED TEAM ROSTER ({activeLeadTeam.members.length}):
+                {/* Full Track Preferences List */}
+                <div className="border-t border-[#2b2e30] pt-2 space-y-1">
+                  <span className="font-silkscreen text-[7.5px] text-[#f4c151] uppercase block">
+                    FULL TRACK PREFERENCES ORDER:
                   </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {activeLeadTeam.members.map((m) => (
-                      <span
-                        key={m.id}
-                        className="bg-[#141618] border border-[#2b2e30] text-[#cfe8ff] font-silkscreen text-[7.5px] px-2 py-0.5 rounded-xs"
-                      >
-                        {m.name} {m.isLead ? '(LEAD)' : ''} &bull; @{m.githubId}
+                  <div className="flex flex-wrap gap-1 font-silkscreen text-[7.5px]">
+                    {activeLeadTeam.trackPreferences && activeLeadTeam.trackPreferences.filter(Boolean).length > 0 ? (
+                      activeLeadTeam.trackPreferences.filter(Boolean).map((track, idx) => (
+                        <span key={idx} className="bg-[#090b0d] border border-[#2b2e30] text-[#cfe8ff] px-2 py-0.5 rounded-xs flex items-center gap-1">
+                          <span className="text-[#f4c151] font-bold">#{idx + 1}:</span> {track}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[#cfe8ff] bg-[#090b0d] px-2 py-0.5 border border-[#2b2e30] rounded-xs">
+                        {activeLeadTeam.selectedTrack || 'General Track'}
                       </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Full Team Roster & Member Details */}
+                <div className="border-t border-[#2b2e30] pt-2 space-y-1">
+                  <span className="font-silkscreen text-[7.5px] text-[#a7d38a] uppercase block">
+                    ADMITTED PARTICIPANTS ROSTER ({activeLeadTeam.members.length}):
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 font-silkscreen text-[7.5px]">
+                    {activeLeadTeam.members.map((m, idx) => (
+                      <div key={m.id || idx} className="bg-[#090b0d] border border-[#2b2e30] p-1.5 rounded-xs text-[#cfe8ff]">
+                        <div className="flex items-center justify-between font-bold">
+                          <span>{m.name} {m.isLead ? '(LEAD)' : ''}</span>
+                          <span className="text-[#8f9396] font-normal">{m.role || 'Member'}</span>
+                        </div>
+                        <div className="text-[7px] text-[#8f9396] font-mono mt-0.5 flex flex-wrap gap-x-2">
+                          {m.email && <span>{m.email}</span>}
+                          {m.phone && <span>{m.phone}</span>}
+                          {m.githubId && <span className="text-[#6fb3d9]">@{m.githubId}</span>}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
