@@ -4,25 +4,23 @@ import {
   Users,
   Zap,
   Sparkles,
-  Terminal,
-  UserPlus,
-  LogIn,
-  Layers,
-  Calendar,
   ShieldAlert,
   ArrowRight,
-  Code2,
-  Cpu,
   Trophy,
+  UserPlus,
 } from 'lucide-react';
 import { CartridgeId } from '../../types';
 import { sound } from '../../utils/audio';
+import { awsService } from '../../services/awsService';
 
 interface DashboardCartridgeProps {
   onNavigate?: (id: CartridgeId) => void;
 }
 
 export function DashboardCartridge({ onNavigate }: DashboardCartridgeProps) {
+  const activeLeadTeam = awsService.getActiveLeadTeam();
+  const isLoggedIn = !!activeLeadTeam;
+
   const handleNav = (id: CartridgeId) => {
     sound.playClick();
     if (onNavigate) {
@@ -37,31 +35,46 @@ export function DashboardCartridge({ onNavigate }: DashboardCartridgeProps) {
     >
       {/* 1. Top Section: Prominent Big COGNITIA Logo & Event Badges */}
       <div className="flex flex-col items-center justify-center space-y-2 pt-1 w-full shrink-0">
-        <div className="relative group flex items-center justify-center w-full max-w-[480px] sm:max-w-[600px] md:max-w-[700px] transition-all duration-300">
+        <div className="relative group flex items-center justify-center w-full max-w-[580px] sm:max-w-[750px] md:max-w-[880px] transition-all duration-300">
           <img
-            src="/cognitia_logo.png"
+            src="/dashboard_logo.png"
             alt="COGNITIA 2K26"
-            className="w-full h-auto max-h-[80px] sm:max-h-[100px] md:max-h-[110px] object-contain drop-shadow-[0_4px_20px_rgba(126,199,255,0.35)] filter brightness-105 contrast-105 transition-all duration-300 group-hover:brightness-115 group-hover:drop-shadow-[0_6px_30px_rgba(126,199,255,0.6)]"
+            className="w-full h-auto max-h-[105px] sm:max-h-[135px] md:max-h-[160px] object-contain drop-shadow-[0_6px_28px_rgba(126,199,255,0.45)] filter brightness-105 contrast-105 transition-all duration-300 group-hover:brightness-115 group-hover:drop-shadow-[0_8px_36px_rgba(126,199,255,0.7)]"
             referrerPolicy="no-referrer"
           />
         </div>
 
         {/* Event Meta Badges */}
-        <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap pt-0.5">
-          <span className="inline-flex items-center gap-1.5 bg-[#142338] text-[#7ec7ff] border border-[#1f4066] font-silkscreen text-[8.5px] sm:text-[9.5px] px-3 py-1 rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#7ec7ff] animate-pulse shadow-[0_0_6px_#7ec7ff]" />
+        <div className="flex items-center justify-between gap-2 sm:gap-3 flex-wrap pt-0.5">
+          <span className="inline-flex items-center gap-1.5 bg-[#142338] text-[#7ec7ff] border border-[#1f4066] font-silkscreen text-[10.5px] sm:text-[11.5px] px-3 py-1 rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+            <span className="h-2 w-2 rounded-full bg-[#7ec7ff] animate-pulse shadow-[0_0_6px_#7ec7ff]" />
             HACKATHON 2026
           </span>
-          <span className="inline-flex items-center gap-1.5 bg-[#1e2f18] text-[#a7d38a] border border-[#2f4f24] font-silkscreen text-[8.5px] sm:text-[9.5px] px-3 py-1 rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
-            <Sparkles className="h-2.5 w-2.5 text-[#f4c151]" />
+          <span className="inline-flex items-center gap-1.5 bg-[#1e2f18] text-[#a7d38a] border border-[#2f4f24] font-silkscreen text-[10.5px] sm:text-[11.5px] px-3 py-1 rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+            <Sparkles className="h-3 w-3 text-[#f4c151]" />
             OFFICIAL STAGE
           </span>
-          <span className="inline-flex items-center gap-1.5 bg-[#2b182b] text-[#ff77e9] border border-[#522352] font-silkscreen text-[8.5px] sm:text-[9.5px] px-3 py-1 rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
-            <Zap className="h-2.5 w-2.5 text-[#ff77e9]" />
-            30-HR SPRINT
+          <span className="inline-flex items-center gap-1.5 bg-[#2b182b] text-[#ff77e9] border border-[#522352] font-silkscreen text-[10.5px] sm:text-[11.5px] px-3 py-1 rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+            <Zap className="h-3 w-3 text-[#ff77e9]" />
+            24-HR SPRINT
           </span>
         </div>
       </div>
+
+      {/* Prominent REGISTER / MANAGE YOUR TEAM NOW CTA Button */}
+      <button
+        onClick={() => handleNav('register')}
+        type="button"
+        className="w-full max-w-lg mx-auto bg-[#182a1b] hover:bg-[#223d27] border-2 border-[#a7d38a] hover:border-[#86efac] text-[#a7d38a] hover:text-white font-pixel text-xs sm:text-sm uppercase py-3 px-5 rounded-xs shadow-[0_0_22px_rgba(167,211,138,0.45),3px_3px_0_0_#000] flex items-center justify-center gap-2.5 transition-all transform hover:scale-[1.02] cursor-pointer"
+      >
+        {isLoggedIn ? (
+          <Users className="w-5 h-5 text-[#86efac] animate-pulse shrink-0" />
+        ) : (
+          <UserPlus className="w-5 h-5 text-[#86efac] animate-pulse shrink-0" />
+        )}
+        <span>{isLoggedIn ? 'MANAGE YOUR TEAM NOW' : 'REGISTER YOUR TEAM NOW'}</span>
+        <ArrowRight className="w-4 h-4 text-[#86efac] shrink-0" />
+      </button>
 
       {/* 2. Key Stat Metrics Grid (3 Main Cards) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 w-full">
@@ -72,24 +85,24 @@ export function DashboardCartridge({ onNavigate }: DashboardCartridgeProps) {
                      transition-transform hover:-translate-y-1 hover:border-[#f4c151]"
         >
           <div className="flex items-center gap-1.5 text-[#f4c151] pb-1">
-            <Award className="h-4 w-4 text-[#f4c151]" />
-            <span className="font-silkscreen text-[9.5px] sm:text-[10.5px] uppercase tracking-wider text-[#d4af37]">
+            <Award className="h-4.5 w-4.5 text-[#f4c151]" />
+            <span className="font-silkscreen text-[13px] sm:text-[14.5px] uppercase tracking-wider text-[#d4af37] font-bold">
               PRIZE POOL
             </span>
           </div>
 
           <div className="py-2">
-            <span className="font-pixel text-[24px] sm:text-[28px] md:text-[30px] text-[#a7d38a] block tracking-wide drop-shadow-[0_0_10px_rgba(167,211,138,0.4)] leading-none">
-              ₹22,000
+            <span className="font-display font-extrabold text-[32px] sm:text-[38px] md:text-[42px] text-[#a7d38a] block tracking-wider drop-shadow-[0_0_12px_rgba(167,211,138,0.45)] leading-none">
+              ₹20,000
             </span>
-            <span className="font-silkscreen text-[8.5px] sm:text-[9.5px] text-[#8fa892] mt-1.5 block">
-              ₹22,000 Total Cash &amp; Bounties
+            <span className="font-silkscreen text-[12.5px] sm:text-[13.5px] text-[#8fa892] mt-2 block font-medium">
+              ₹20,000 Total Cash &amp; Bounties
             </span>
           </div>
 
           <div className="w-full pt-2 border-t border-[#23272a]">
-            <span className="font-silkscreen text-[8px] sm:text-[8.5px] text-[#7d8285]">
-              ₹10K / ₹6K / ₹4K + ₹2K Bounties
+            <span className="font-silkscreen text-[11.5px] sm:text-[12.5px] text-[#9aa0b0]">
+              ₹10K / ₹5K / ₹3K + ₹2K Bounties
             </span>
           </div>
         </div>
@@ -101,23 +114,23 @@ export function DashboardCartridge({ onNavigate }: DashboardCartridgeProps) {
                      transition-transform hover:-translate-y-1 hover:border-[#7ec7ff]"
         >
           <div className="flex items-center gap-1.5 text-[#7ec7ff] pb-1">
-            <Users className="h-4 w-4 text-[#7ec7ff]" />
-            <span className="font-silkscreen text-[9.5px] sm:text-[10.5px] uppercase tracking-wider text-[#6fb3d9]">
+            <Users className="h-4.5 w-4.5 text-[#7ec7ff]" />
+            <span className="font-silkscreen text-[13px] sm:text-[14.5px] uppercase tracking-wider text-[#6fb3d9] font-bold">
               SELECTED BUILDERS
             </span>
           </div>
 
           <div className="py-2">
-            <span className="font-pixel text-[24px] sm:text-[28px] md:text-[30px] text-[#7ec7ff] block tracking-wide drop-shadow-[0_0_10px_rgba(126,199,255,0.4)] leading-none">
+            <span className="font-display font-extrabold text-[32px] sm:text-[38px] md:text-[42px] text-[#7ec7ff] block tracking-wider drop-shadow-[0_0_12px_rgba(126,199,255,0.45)] leading-none">
               80 HACKERS
             </span>
-            <span className="font-silkscreen text-[8.5px] sm:text-[9.5px] text-[#9ad4ff] mt-1.5 block">
+            <span className="font-silkscreen text-[12.5px] sm:text-[13.5px] text-[#9ad4ff] mt-2 block font-medium">
               Curated Elite Cohort
             </span>
           </div>
 
           <div className="w-full pt-2 border-t border-[#23272a]">
-            <span className="font-silkscreen text-[8px] sm:text-[8.5px] text-[#7d8285]">
+            <span className="font-silkscreen text-[11.5px] sm:text-[12.5px] text-[#9aa0b0]">
               1 to 4 Members Per Team
             </span>
           </div>
@@ -130,87 +143,26 @@ export function DashboardCartridge({ onNavigate }: DashboardCartridgeProps) {
                      transition-transform hover:-translate-y-1 hover:border-[#f2933d]"
         >
           <div className="flex items-center gap-1.5 text-[#f2933d] pb-1">
-            <Zap className="h-4 w-4 text-[#f2933d]" />
-            <span className="font-silkscreen text-[9.5px] sm:text-[10.5px] uppercase tracking-wider text-[#e68a35]">
+            <Zap className="h-4.5 w-4.5 text-[#f2933d]" />
+            <span className="font-silkscreen text-[13px] sm:text-[14.5px] uppercase tracking-wider text-[#e68a35] font-bold">
               SPRINT DURATION
             </span>
           </div>
 
           <div className="py-2">
-            <span className="font-pixel text-[24px] sm:text-[28px] md:text-[30px] text-[#f4c151] block tracking-wide drop-shadow-[0_0_10px_rgba(244,193,81,0.4)] leading-none">
-              30 HOURS
+            <span className="font-display font-extrabold text-[32px] sm:text-[38px] md:text-[42px] text-[#f4c151] block tracking-wider drop-shadow-[0_0_12px_rgba(244,193,81,0.45)] leading-none">
+              24 HOURS
             </span>
-            <span className="font-silkscreen text-[8.5px] sm:text-[9.5px] text-[#ffd17d] mt-1.5 block">
+            <span className="font-silkscreen text-[12.5px] sm:text-[13.5px] text-[#ffd17d] mt-2 block font-medium">
               Non-Stop Building &amp; Mentorship
             </span>
           </div>
 
           <div className="w-full pt-2 border-t border-[#23272a]">
-            <span className="font-silkscreen text-[8px] sm:text-[8.5px] text-[#7d8285]">
+            <span className="font-silkscreen text-[11.5px] sm:text-[12.5px] text-[#9aa0b0]">
               Ideate &bull; Build &bull; Ship &bull; Win
             </span>
           </div>
-        </div>
-      </div>
-
-      {/* 3. Quick Action Navigation Cards (Professional Direct Links) */}
-      <div className="w-full space-y-2">
-        <div className="flex items-center justify-between px-1">
-          <span className="font-silkscreen text-[9.5px] sm:text-[10.5px] text-[#7ec7ff] uppercase tracking-widest flex items-center gap-1.5 font-bold">
-            <Cpu className="w-3.5 h-3.5 text-[#f4c151]" />
-            QUICK ACCESS MODULES
-          </span>
-          <span className="font-silkscreen text-[8px] text-gray-400">SELECT ACTION</span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-          {/* Action 1: Register Team */}
-          <button
-            onClick={() => handleNav('register')}
-            className="group p-2.5 sm:p-3 rounded bg-[#181d24] hover:bg-[#222a36] border-2 border-[#1f3044] hover:border-[#00f0ff] transition-all flex flex-col items-center justify-center text-center shadow-[3px_3px_0_rgba(0,0,0,0.5)] active:translate-x-[1px] active:translate-y-[1px]"
-          >
-            <UserPlus className="w-5 h-5 text-[#00f0ff] group-hover:scale-110 transition-transform mb-1" />
-            <span className="font-silkscreen text-[10px] sm:text-[11px] text-white group-hover:text-[#00f0ff] font-bold">
-              REGISTER TEAM
-            </span>
-            <span className="font-silkscreen text-[8.5px] sm:text-[9px] text-[#9ad4ff]/80 mt-1">Form Lead &amp; Squad</span>
-          </button>
-
-          {/* Action 2: Team Login */}
-          <button
-            onClick={() => handleNav('login')}
-            className="group p-2.5 sm:p-3 rounded bg-[#181d24] hover:bg-[#222a36] border-2 border-[#1f3044] hover:border-[#f4c151] transition-all flex flex-col items-center justify-center text-center shadow-[3px_3px_0_rgba(0,0,0,0.5)] active:translate-x-[1px] active:translate-y-[1px]"
-          >
-            <LogIn className="w-5 h-5 text-[#f4c151] group-hover:scale-110 transition-transform mb-1" />
-            <span className="font-silkscreen text-[10px] sm:text-[11px] text-white group-hover:text-[#f4c151] font-bold">
-              TEAM LOGIN
-            </span>
-            <span className="font-silkscreen text-[8.5px] sm:text-[9px] text-[#ffd17d]/80 mt-1">Submissions &amp; Pass</span>
-          </button>
-
-          {/* Action 3: Challenge Tracks */}
-          <button
-            onClick={() => handleNav('tracks')}
-            className="group p-2.5 sm:p-3 rounded bg-[#181d24] hover:bg-[#222a36] border-2 border-[#1f3044] hover:border-[#a7d38a] transition-all flex flex-col items-center justify-center text-center shadow-[3px_3px_0_rgba(0,0,0,0.5)] active:translate-x-[1px] active:translate-y-[1px]"
-          >
-            <Layers className="w-5 h-5 text-[#a7d38a] group-hover:scale-110 transition-transform mb-1" />
-            <span className="font-silkscreen text-[10px] sm:text-[11px] text-white group-hover:text-[#a7d38a] font-bold">
-              TRACK BOUNTIES
-            </span>
-            <span className="font-silkscreen text-[8.5px] sm:text-[9px] text-[#a7d38a]/80 mt-1">AI, Web3 &amp; Retro</span>
-          </button>
-
-          {/* Action 4: Schedule */}
-          <button
-            onClick={() => handleNav('timeline')}
-            className="group p-2.5 sm:p-3 rounded bg-[#181d24] hover:bg-[#222a36] border-2 border-[#1f3044] hover:border-[#ff77e9] transition-all flex flex-col items-center justify-center text-center shadow-[3px_3px_0_rgba(0,0,0,0.5)] active:translate-x-[1px] active:translate-y-[1px]"
-          >
-            <Calendar className="w-5 h-5 text-[#ff77e9] group-hover:scale-110 transition-transform mb-1" />
-            <span className="font-silkscreen text-[10px] sm:text-[11px] text-white group-hover:text-[#ff77e9] font-bold">
-              TIMELINE
-            </span>
-            <span className="font-silkscreen text-[8.5px] sm:text-[9px] text-[#ff77e9]/80 mt-1">30-Hour Schedule</span>
-          </button>
         </div>
       </div>
 
@@ -219,17 +171,17 @@ export function DashboardCartridge({ onNavigate }: DashboardCartridgeProps) {
         {/* Track Spotlight Box */}
         <div className="bg-[#121417] border border-[#23272b] p-3 rounded space-y-1.5 shadow-[3px_3px_0_rgba(0,0,0,0.5)]">
           <div className="flex items-center justify-between">
-            <span className="font-silkscreen text-[9.5px] text-[#f4c151] flex items-center gap-1.5 uppercase font-bold">
-              <Trophy className="w-3.5 h-3.5 text-[#f4c151]" /> FEATURED TRACKS
+            <span className="font-silkscreen text-[11.5px] text-[#f4c151] flex items-center gap-1.5 uppercase font-bold">
+              <Trophy className="w-4 h-4 text-[#f4c151]" /> FEATURED TRACKS
             </span>
             <button
               onClick={() => handleNav('tracks')}
-              className="font-silkscreen text-[8.5px] text-[#7ec7ff] hover:text-[#00f0ff] hover:underline flex items-center gap-1"
+              className="font-silkscreen text-[10.5px] text-[#7ec7ff] hover:text-[#00f0ff] hover:underline flex items-center gap-1 cursor-pointer"
             >
-              VIEW ALL <ArrowRight className="w-3 h-3" />
+              VIEW ALL <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
-          <p className="font-silkscreen text-[9.5px] sm:text-[10px] text-gray-300 leading-relaxed">
+          <p className="font-silkscreen text-[11px] sm:text-[12px] text-gray-300 leading-relaxed">
             Choose from <strong className="text-[#00f0ff]">Web3 Bounties</strong>, <strong className="text-[#a7d38a]">GenAI Agents</strong>, <strong className="text-[#ff77e9]">Retro 8-Bit Games</strong>, or <strong className="text-[#f4c151]">Open Innovation</strong>.
           </p>
         </div>
@@ -237,17 +189,17 @@ export function DashboardCartridge({ onNavigate }: DashboardCartridgeProps) {
         {/* Rules & Code of Conduct Spotlight Box */}
         <div className="bg-[#121417] border border-[#23272b] p-3 rounded space-y-1.5 shadow-[3px_3px_0_rgba(0,0,0,0.5)]">
           <div className="flex items-center justify-between">
-            <span className="font-silkscreen text-[9.5px] text-[#a7d38a] flex items-center gap-1.5 uppercase font-bold">
-              <ShieldAlert className="w-3.5 h-3.5 text-[#a7d38a]" /> RULES &amp; ETHICS
+            <span className="font-silkscreen text-[11.5px] text-[#a7d38a] flex items-center gap-1.5 uppercase font-bold">
+              <ShieldAlert className="w-4 h-4 text-[#a7d38a]" /> RULES &amp; ETHICS
             </span>
             <button
               onClick={() => handleNav('rules')}
-              className="font-silkscreen text-[8.5px] text-[#7ec7ff] hover:text-[#00f0ff] hover:underline flex items-center gap-1"
+              className="font-silkscreen text-[10.5px] text-[#7ec7ff] hover:text-[#00f0ff] hover:underline flex items-center gap-1 cursor-pointer"
             >
-              READ RULES <ArrowRight className="w-3 h-3" />
+              READ RULES <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
-          <p className="font-silkscreen text-[9.5px] sm:text-[10px] text-gray-300 leading-relaxed">
+          <p className="font-silkscreen text-[11px] sm:text-[12px] text-gray-300 leading-relaxed">
             All project code must be initiated within the 30-hour sprint window. Teams of 1–4 members permitted with original work.
           </p>
         </div>

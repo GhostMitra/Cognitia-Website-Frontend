@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CartridgeId } from '../../types';
 import { sound } from '../../utils/audio';
+import { awsService } from '../../services/awsService';
 
 interface CartridgeDeckScreenProps {
   currentCartridge: CartridgeId;
@@ -13,25 +14,38 @@ interface MenuPageItem {
   name: string;
 }
 
-const MENU_PAGES: MenuPageItem[] = [
-  { id: 'dashboard', name: 'DASHBOARD' },
-  { id: 'register', name: 'REGISTER TEAM' },
-  { id: 'login', name: 'TEAM LOGIN' },
-  { id: 'rules', name: 'RULES' },
-  { id: 'tracks', name: 'TRACKS' },
-  { id: 'timeline', name: 'SCHEDULE' },
-  { id: 'sponsors', name: 'SPONSORS' },
-  { id: 'members', name: 'MEMBERS' },
-  { id: 'prizes', name: 'PRIZES' },
-  { id: 'faq', name: 'FAQ' },
-];
-
 export function CartridgeDeckScreen({
   currentCartridge,
   onSelectCartridge,
   onCloseDeck,
 }: CartridgeDeckScreenProps) {
   const [hoveredId, setHoveredId] = useState<CartridgeId | null>(null);
+  const activeLeadTeam = awsService.getActiveLeadTeam();
+  const isLoggedIn = !!activeLeadTeam;
+
+  const menuPages: MenuPageItem[] = isLoggedIn
+    ? [
+        { id: 'dashboard', name: 'DASHBOARD' },
+        { id: 'register', name: 'TEAM DASHBOARD' },
+        { id: 'rules', name: 'RULES' },
+        { id: 'tracks', name: 'TRACKS' },
+        { id: 'timeline', name: 'SCHEDULE' },
+        { id: 'sponsors', name: 'SPONSORS' },
+        { id: 'members', name: 'MEMBERS' },
+        { id: 'prizes', name: 'PRIZES' },
+        { id: 'faq', name: 'FAQ' },
+      ]
+    : [
+        { id: 'dashboard', name: 'DASHBOARD' },
+        { id: 'login', name: 'TEAM LOGIN' },
+        { id: 'rules', name: 'RULES' },
+        { id: 'tracks', name: 'TRACKS' },
+        { id: 'timeline', name: 'SCHEDULE' },
+        { id: 'sponsors', name: 'SPONSORS' },
+        { id: 'members', name: 'MEMBERS' },
+        { id: 'prizes', name: 'PRIZES' },
+        { id: 'faq', name: 'FAQ' },
+      ];
 
   const handleSelect = (id: CartridgeId) => {
     sound.playBoot();
@@ -47,9 +61,9 @@ export function CartridgeDeckScreen({
       {/* Centered 2-Column Menu Layout */}
       <div className="w-full max-w-xl sm:max-w-2xl flex flex-col justify-center items-center my-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 sm:gap-x-16 md:gap-x-20 gap-y-6 sm:gap-y-8 md:gap-y-9 w-fit mx-auto">
-          {MENU_PAGES.map((page) => {
+          {menuPages.map((page) => {
             const isHovered = hoveredId === page.id;
-            const isCurrent = currentCartridge === page.id;
+            const isCurrent = currentCartridge === page.id || (isLoggedIn && page.id === 'register' && currentCartridge === 'login');
             const showRedPin = isHovered || isCurrent;
 
             return (

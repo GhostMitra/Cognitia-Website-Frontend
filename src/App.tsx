@@ -20,9 +20,36 @@ import { ThemeLoadingScreen, RetroThemeId } from './components/ThemeLoadingScree
 import { CartridgeSwapLoader } from './components/CartridgeSwapLoader';
 import { CartridgeId } from './types';
 import { sound } from './utils/audio';
+import { awsService } from './services/awsService';
 
 export default function App() {
-  const [currentCartridge, setCurrentCartridge] = useState<CartridgeId>('dashboard');
+  const [currentCartridge, setCurrentCartridge] = useState<CartridgeId>(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname.toLowerCase();
+      if (path.includes('admin')) return 'admin';
+      if (path.includes('login')) return 'login';
+      if (path.includes('register') || path.includes('submit')) return 'register';
+
+      const saved = localStorage.getItem('cognitia_last_cartridge') as CartridgeId;
+      const validCartridges: CartridgeId[] = [
+        'dashboard',
+        'register',
+        'login',
+        'rules',
+        'tracks',
+        'timeline',
+        'sponsors',
+        'members',
+        'prizes',
+        'faq',
+        'admin',
+      ];
+      if (saved && validCartridges.includes(saved)) {
+        return saved;
+      }
+    }
+    return 'dashboard';
+  });
   const [isDeckOpen, setIsDeckOpen] = useState<boolean>(false);
   const [isBooting, setIsBooting] = useState<boolean>(true);
   const [showPwaScreen, setShowPwaScreen] = useState<boolean>(false);
@@ -46,20 +73,15 @@ export default function App() {
 
   const handleBootComplete = () => {
     setIsBooting(false);
-    if (typeof window !== 'undefined') {
-      const isDismissed = localStorage.getItem('cognitia_pwa_prompt_dismissed') === 'true';
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
-      if (!isDismissed && !isStandalone) {
-        setShowPwaScreen(true);
-      }
-    }
+    setShowPwaScreen(false);
   };
 
   const getCartridgeNameById = (id: CartridgeId) => {
+    const isLoggedIn = !!awsService.getActiveLeadTeam();
     switch (id) {
       case 'dashboard': return 'DASHBOARD';
-      case 'register': return 'REGISTER TEAM';
-      case 'login': return 'TEAM LOGIN';
+      case 'register': return isLoggedIn ? 'TEAM DASHBOARD' : 'REGISTER TEAM';
+      case 'login': return isLoggedIn ? 'TEAM DASHBOARD' : 'TEAM LOGIN';
       case 'rules': return 'RULES & REGS';
       case 'tracks': return 'TRACKS';
       case 'timeline': return 'SCHEDULE';
@@ -70,6 +92,13 @@ export default function App() {
       case 'admin': return 'ADMIN PORTAL';
     }
   };
+
+  // Sync cartridge selection to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cognitia_last_cartridge', currentCartridge);
+    }
+  }, [currentCartridge]);
 
   // Initial path routing check (e.g., /admin, /login, /register)
   useEffect(() => {
@@ -179,7 +208,7 @@ export default function App() {
     if (isDeckOpen) return 'SELECTING ROM CARTRIDGE MODULE...';
     switch (currentCartridge) {
       case 'dashboard':
-        return 'COGNITIA 2026 • 30-HOUR SPRINT • ₹22,000 CASH POOL';
+        return 'COGNITIA 2026 • 30-HOUR SPRINT • ₹20,000 CASH POOL';
       case 'register':
         return 'TEAM LEADER REGISTRATION PORTAL';
       case 'login':
@@ -195,7 +224,7 @@ export default function App() {
       case 'members':
         return 'MEMBERS & JURY ROSTER [TO BE ANNOUNCED]';
       case 'prizes':
-        return '₹22,000 TOTAL CASH PRIZE POOL';
+        return '₹20,000 TOTAL CASH PRIZE POOL';
       case 'faq':
         return 'KNOWLEDGE BASE FAQ';
       case 'admin':
@@ -204,13 +233,14 @@ export default function App() {
   };
 
   const getCartridgeName = () => {
+    const isLoggedIn = !!awsService.getActiveLeadTeam();
     if (isBooting) return 'INITIALIZING';
     if (isSwitchingCartridge) return targetCartridgeName || 'SWAPPING ROM';
     if (showPwaScreen) return 'INSTALL PWA';
     switch (currentCartridge) {
       case 'dashboard': return 'DASHBOARD';
-      case 'register': return 'REGISTER TEAM';
-      case 'login': return 'TEAM LOGIN';
+      case 'register': return isLoggedIn ? 'TEAM DASHBOARD' : 'REGISTER TEAM';
+      case 'login': return isLoggedIn ? 'TEAM DASHBOARD' : 'TEAM LOGIN';
       case 'rules': return 'RULES & REGS';
       case 'tracks': return 'TRACKS';
       case 'timeline': return 'SCHEDULE';
@@ -306,6 +336,15 @@ export default function App() {
           </div>
         </ConsoleShell>
       </section>
+
+      {/* Centered Cognitia Brand Logo SVG (Just after console, just above footer) */}
+      <div className="w-full flex items-center justify-center py-6 sm:py-10 px-4 shrink-0">
+        <img
+          src="/cognitia_logo.svg"
+          alt="Cognitia Official Crest Logo"
+          className="h-20 sm:h-28 md:h-36 lg:h-44 w-auto max-w-[94vw] object-contain drop-shadow-[0_6px_32px_rgba(126,199,255,0.55)] filter brightness-110 contrast-105 transition-all duration-300 hover:scale-[1.03]"
+        />
+      </div>
 
       {/* 
         SCREEN 2: Real-World Marketing & Design System Footer (Outside Console)

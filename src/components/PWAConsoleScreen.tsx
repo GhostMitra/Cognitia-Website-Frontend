@@ -130,7 +130,7 @@ export const PWAConsoleScreen: React.FC<PWAConsoleScreenProps> = ({ onContinueTo
           className="w-full sm:flex-1 flex items-center justify-center gap-2 bg-[#00f0ff] hover:bg-[#80f8ff] text-[#0a1828] font-['Silkscreen'] font-bold text-xs sm:text-sm py-2.5 px-4 border-2 border-white shadow-[3px_3px_0px_#000000] active:translate-x-[1px] active:translate-y-[1px] transition-transform cursor-pointer"
         >
           <Play className="w-4 h-4 fill-current" />
-          CONTINUE TO DASHBOARD ▶
+          ENTER DASHBOARD ▶
         </button>
       </div>
 

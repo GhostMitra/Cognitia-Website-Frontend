@@ -94,10 +94,13 @@ export interface ProjectSubmission {
   teamId: string;
   projectTitle: string;
   tagline: string;
-  trackId: string;
+  trackId?: string;
   githubRepoUrl: string;
-  pptUrl: string;
-  pptFileName: string;
+  proposedSolution?: string;
+  techStackJustification?: string;
+  deploymentStrategy?: string;
+  pptUrl?: string;
+  pptFileName?: string;
   screenshots: string[]; // URLs or Base64 S3 storage
   submittedAt: string;
   updatedAt: string;
@@ -114,15 +117,25 @@ export interface TeamRegistration {
   leadPhone: string;
   leadPasswordHash?: string;
   members: TeamMember[];
+  isMembersLocked?: boolean;
+  selectedTrack?: string;
+  trackPreferences?: string[];
+  isTrackLocked?: boolean;
+  trackLockedAt?: string;
   registeredAt: string;
   submission?: ProjectSubmission;
-  // Phase 2 Offline Round Fields
-  phase2Status?: Phase2SelectionStatus;
-  rsvpConfirmed?: boolean;
+  // Phase 1 Payment Fields
   paymentStatus?: Phase2PaymentStatus;
   paymentScreenshotUrl?: string;
   paymentTransactionId?: string;
   paymentSubmittedAt?: string;
+  // Phase 2 Offline Round Fields
+  phase2Status?: Phase2SelectionStatus;
+  rsvpConfirmed?: boolean;
+  phase2PaymentStatus?: Phase2PaymentStatus;
+  phase2PaymentScreenshotUrl?: string;
+  phase2PaymentTransactionId?: string;
+  phase2PaymentSubmittedAt?: string;
   ticketPassId?: string;
   ticketIssuedAt?: string;
   // Offline Attendance Fields

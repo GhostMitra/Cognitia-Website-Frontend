@@ -1,12 +1,17 @@
 @import "tailwindcss";
 
 @layer base {
+  html {
+    font-size: 122%;
+  }
   body {
     background-color: #0b132b;
     color: #ffffff;
     font-family: 'Space Grotesk', sans-serif;
     overflow-x: hidden;
     cursor: auto;
+    font-size: 1.15rem;
+    line-height: 1.5;
   }
 }
 
@@ -27,7 +32,7 @@
   cursor: url('/spidey-pointer.svg') 16 16, pointer !important;
 }
 
-/* 8-Bit Textboxes & Input Fonts (Case-Sensitive VT323 8-Bit Pixel Typography & Cyan Caret) */
+/* 8-Bit Textboxes & Input Fonts (Case-Sensitive Share Tech Mono Typography & Cyan Caret) */
 input[type="text"],
 input[type="email"],
 input[type="tel"],
@@ -36,9 +41,9 @@ input[type="number"],
 input[type="url"],
 textarea,
 select {
-  font-family: 'VT323', monospace !important;
-  font-size: 16px !important;
-  letter-spacing: 0.05em !important;
+  font-family: 'Share Tech Mono', 'VT323', monospace !important;
+  font-size: 20px !important;
+  letter-spacing: 0.04em !important;
   text-transform: none !important;
   caret-color: #00f0ff !important;
   cursor: url('/spidey-text-cursor.svg') 16 16, text !important;
@@ -46,8 +51,8 @@ select {
 
 input::placeholder,
 textarea::placeholder {
-  font-family: 'VT323', monospace !important;
-  font-size: 16px !important;
+  font-family: 'Share Tech Mono', 'VT323', monospace !important;
+  font-size: 20px !important;
   opacity: 0.65;
   text-transform: none !important;
   cursor: url('/spidey-text-cursor.svg') 16 16, text !important;
@@ -64,26 +69,35 @@ textarea::placeholder {
   color: #090b0d !important;
 }
 
-/* Custom Pixel & Retro Fonts from Google Fonts */
+/* Custom High-Clarity Retro & Arcade Fonts */
 .font-pixel {
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'Pixelify Sans', 'Orbitron', 'Press Start 2P', monospace;
+  font-weight: 700;
+  font-size: 1.18em;
+  letter-spacing: 0.02em;
 }
 
 .font-silkscreen {
-  font-family: 'Silkscreen', cursive;
+  font-family: 'Chakra Petch', 'Silkscreen', sans-serif;
+  font-weight: 600;
+  font-size: 1.15em;
+  letter-spacing: 0.02em;
 }
 
 .font-mono-retro,
 .font-vt323 {
-  font-family: 'VT323', monospace;
+  font-family: 'Share Tech Mono', 'VT323', monospace;
+  font-size: 1.2em;
 }
 
 .font-display {
-  font-family: 'Anton', sans-serif;
+  font-family: 'Orbitron', 'Anton', sans-serif;
+  font-weight: 800;
 }
 
 .font-condensed {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Chakra Petch', 'Oswald', sans-serif;
+  font-weight: 600;
 }
 
 /* Scanlines overlay effect for CRT screen */

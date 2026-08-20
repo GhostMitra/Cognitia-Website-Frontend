@@ -7,8 +7,8 @@ import {
   AttendanceStatus,
 } from '../types';
 
-const STORAGE_KEY_TEAMS = 'cognitia_aws_teams_v1';
-const STORAGE_KEY_AUTH = 'cognitia_lead_session_v1';
+const STORAGE_KEY_TEAMS = 'cognitia_aws_teams_v2';
+const STORAGE_KEY_AUTH = 'cognitia_lead_session_v2';
 
 class AWSService {
   private teams: TeamRegistration[] = [];
@@ -19,6 +19,10 @@ class AWSService {
 
   private loadFromStorage() {
     try {
+      // Automatically purge legacy browser cache keys to guarantee a completely fresh state
+      localStorage.removeItem('cognitia_aws_teams_v1');
+      localStorage.removeItem('cognitia_lead_session_v1');
+
       const stored = localStorage.getItem(STORAGE_KEY_TEAMS);
       if (stored) {
         const parsed = JSON.parse(stored);
@@ -46,23 +50,71 @@ class AWSService {
     file: File,
     folder: 'ppts' | 'screenshots' | 'payments'
   ): Promise<{ url: string; fileName: string }> {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        const bucket = (import.meta as any).env?.VITE_AWS_S3_BUCKET || 'cognitia-2026-submissions-529470779811';
-        const region = (import.meta as any).env?.VITE_AWS_REGION || 'ap-south-1';
-        const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const s3Key = `submissions/${folder}/${Date.now()}_${sanitizedName}`;
-        
-        console.log(`[S3 Direct Upload] Target bucket: s3://${bucket}/${s3Key} (Region: ${region})`);
+    return new Promise((resolve, reject) => {
+      const MAX_FILE_SIZE_BYTES = 1 * 1024 * 1024; // 1 MB = 1,048,576 bytes
+      if (folder === 'payments' && file.size > MAX_FILE_SIZE_BYTES) {
+        reject(new Error(`FILE_TOO_LARGE: Image size ${(file.size / (1024 * 1024)).toFixed(2)} MB exceeds 1 MB limit.`));
+        return;
+      }
 
-        resolve({
-          url: result,
-          fileName: file.name,
-        });
-      };
-      reader.readAsDataURL(file);
+      const bucket = (import.meta as any).env?.VITE_AWS_S3_BUCKET || 'cognitia-2026-submissions-529470779811';
+      const region = (import.meta as any).env?.VITE_AWS_REGION || 'ap-south-1';
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const s3Key = `submissions/${folder}/${Date.now()}_${sanitizedName}`;
+      console.log(`[S3 Direct Upload] Target bucket: s3://${bucket}/${s3Key} (Region: ${region})`);
+
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const rawUrl = e.target?.result as string;
+          const img = new Image();
+          img.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              const MAX_WIDTH = 800;
+              const MAX_HEIGHT = 800;
+              let width = img.width;
+              let height = img.height;
+
+              if (width > height) {
+                if (width > MAX_WIDTH) {
+                  height = Math.round((height * MAX_WIDTH) / width);
+                  width = MAX_WIDTH;
+                }
+              } else {
+                if (height > MAX_HEIGHT) {
+                  width = Math.round((width * MAX_HEIGHT) / height);
+                  height = MAX_HEIGHT;
+                }
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                ctx.drawImage(img, 0, 0, width, height);
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                resolve({ url: compressedDataUrl, fileName: file.name });
+                return;
+              }
+            } catch (err) {
+              console.warn('Image canvas compression failed, falling back to raw data URL', err);
+            }
+            resolve({ url: rawUrl, fileName: file.name });
+          };
+          img.onerror = () => resolve({ url: rawUrl, fileName: file.name });
+          img.src = rawUrl;
+        };
+        reader.onerror = () => reject(new Error('READ_ERROR'));
+        reader.readAsDataURL(file);
+      } else {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve({ url: reader.result as string, fileName: file.name });
+        };
+        reader.onerror = () => reject(new Error('READ_ERROR'));
+        reader.readAsDataURL(file);
+      }
     });
   }
 
@@ -125,9 +177,11 @@ class AWSService {
       leadEmail: cleanEmail,
       leadPhone: data.leadPhone,
       leadPasswordHash: data.passwordHash,
+      isMembersLocked: false,
       registeredAt: new Date().toISOString(),
       phase2Status: 'pending',
       paymentStatus: 'unpaid',
+      phase2PaymentStatus: 'unpaid',
       attendanceStatus: 'not_checked_in',
       members: [
         {
@@ -191,7 +245,8 @@ class AWSService {
   public async updateTeamDetails(
     teamId: string,
     teamName: string,
-    members: TeamMember[]
+    members: TeamMember[],
+    isMembersLocked?: boolean
   ): Promise<{ success: boolean; team?: TeamRegistration; message?: string }> {
     const index = this.teams.findIndex((t) => t.id === teamId);
     if (index === -1) return { success: false, message: 'Team not found.' };
@@ -215,16 +270,44 @@ class AWSService {
 
     this.teams[index].teamName = teamName;
     this.teams[index].members = members;
+    if (isMembersLocked !== undefined) {
+      this.teams[index].isMembersLocked = isMembersLocked;
+    }
     this.saveToStorage();
 
     return { success: true, team: this.teams[index] };
+  }
+
+  // Permanently lock team track preferences (Ordered 1 to 5; Once locked, cannot be changed even before deadline)
+  public async lockTrackPreference(
+    teamId: string,
+    trackPreferences: string[]
+  ): Promise<{ success: boolean; team?: TeamRegistration; message?: string }> {
+    const team = this.teams.find((t) => t.id === teamId);
+    if (!team) return { success: false, message: 'Team not found.' };
+
+    if (team.isTrackLocked) {
+      return {
+        success: false,
+        team,
+        message: `Track preferences are already permanently locked and cannot be modified.`,
+      };
+    }
+
+    team.trackPreferences = trackPreferences;
+    team.selectedTrack = trackPreferences[0] || '';
+    team.isTrackLocked = true;
+    team.trackLockedAt = new Date().toISOString();
+    this.saveToStorage();
+
+    return { success: true, team };
   }
 
   // Project Deliverable Submission (PPT, Github, Screenshots)
   public async saveProjectSubmission(
     teamId: string,
     submissionData: Omit<ProjectSubmission, 'id' | 'teamId' | 'submittedAt' | 'updatedAt'>
-  ): Promise<{ success: boolean; submission?: ProjectSubmission }> {
+  ): Promise<{ success: boolean; submission?: ProjectSubmission; team?: TeamRegistration }> {
     const team = this.teams.find((t) => t.id === teamId);
     if (!team) return { success: false };
 
@@ -240,7 +323,7 @@ class AWSService {
     team.submission = submission;
     this.saveToStorage();
 
-    return { success: true, submission };
+    return { success: true, submission, team };
   }
 
   // PHASE 2 OFFLINE ROUND & SELECTION METHODS
@@ -268,7 +351,7 @@ class AWSService {
     return { success: true, team };
   }
 
-  // Participant uploads Phase 2 payment screenshot and transaction ID / UTR
+  // Participant uploads Phase 1 payment screenshot and transaction ID / UTR
   public async submitPaymentScreenshot(
     teamId: string,
     screenshotUrl: string,
@@ -286,7 +369,62 @@ class AWSService {
     return { success: true, team };
   }
 
-  // Admin verifies payment & issues unique pass ticket ID
+  // Participant uploads Phase 2 payment screenshot and transaction ID / UTR
+  public async submitPhase2PaymentDetails(
+    teamId: string,
+    screenshotUrl: string,
+    transactionId?: string
+  ): Promise<{ success: boolean; team?: TeamRegistration }> {
+    const team = this.teams.find((t) => t.id === teamId);
+    if (!team) return { success: false };
+
+    team.phase2PaymentStatus = 'payment_pending';
+    team.phase2PaymentScreenshotUrl = screenshotUrl;
+    team.phase2PaymentTransactionId = transactionId || team.phase2PaymentTransactionId;
+    team.phase2PaymentSubmittedAt = new Date().toISOString();
+    this.saveToStorage();
+
+    return { success: true, team };
+  }
+
+  // Admin manually updates Phase 1 payment status ('unpaid' | 'payment_pending' | 'payment_verified')
+  public async updatePhase1PaymentStatus(
+    teamId: string,
+    status: Phase2PaymentStatus
+  ): Promise<{ success: boolean; team?: TeamRegistration }> {
+    const team = this.teams.find((t) => t.id === teamId);
+    if (!team) return { success: false };
+
+    team.paymentStatus = status;
+    this.saveToStorage();
+
+    return { success: true, team };
+  }
+
+  // Admin manually updates Phase 2 payment status ('unpaid' | 'payment_pending' | 'payment_verified')
+  public async updatePhase2PaymentStatus(
+    teamId: string,
+    status: Phase2PaymentStatus
+  ): Promise<{ success: boolean; team?: TeamRegistration; ticketId?: string }> {
+    const team = this.teams.find((t) => t.id === teamId);
+    if (!team) return { success: false };
+
+    team.phase2PaymentStatus = status;
+
+    let ticketId = team.ticketPassId;
+    if (status === 'payment_verified' && !team.ticketPassId) {
+      const randomDigits = Math.floor(1000 + Math.random() * 9000);
+      ticketId = `COGNITIA-2026-PASS-${randomDigits}`;
+      team.ticketPassId = ticketId;
+      team.ticketIssuedAt = new Date().toISOString();
+    }
+
+    this.saveToStorage();
+
+    return { success: true, team, ticketId };
+  }
+
+  // Admin verifies payment & issues unique pass ticket ID (Legacy helper)
   public async verifyPaymentAndGenerateTicket(
     teamId: string
   ): Promise<{ success: boolean; team?: TeamRegistration; ticketId?: string }> {
@@ -294,9 +432,10 @@ class AWSService {
     if (!team) return { success: false };
 
     const randomDigits = Math.floor(1000 + Math.random() * 9000);
-    const ticketId = `COGNITIA-2026-PASS-${randomDigits}`;
+    const ticketId = team.ticketPassId || `COGNITIA-2026-PASS-${randomDigits}`;
 
     team.paymentStatus = 'payment_verified';
+    team.phase2PaymentStatus = 'payment_verified';
     team.ticketPassId = ticketId;
     team.ticketIssuedAt = new Date().toISOString();
     this.saveToStorage();
@@ -332,6 +471,16 @@ class AWSService {
   // Admin Access Methods
   public getAllRegistrations(): TeamRegistration[] {
     return [...this.teams];
+  }
+
+  public clearAllData(): void {
+    this.teams = [];
+    try {
+      localStorage.removeItem(STORAGE_KEY_TEAMS);
+      localStorage.removeItem(STORAGE_KEY_AUTH);
+    } catch {
+      // Ignore storage errors
+    }
   }
 }
 

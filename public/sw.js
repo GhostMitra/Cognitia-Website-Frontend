@@ -8,6 +8,8 @@ const PRECACHE_ASSETS = [
   '/icon-512x512.png',
   '/apple-touch-icon.png',
   '/cognitia_logo.png',
+  '/cognitia_logo.svg',
+  '/dashboard_logo.png',
   '/spidey_head_spritesheet.png',
   '/spidey_user_spritesheet.png',
   '/red_pin.png',
